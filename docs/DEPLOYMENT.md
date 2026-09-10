@@ -1,0 +1,2 @@
+# Deployment
+سرویس Django را پشت Caddy/Nginx با TLS اجرا کنید؛ `python backend/manage.py migrate` و سپس Gunicorn (`gunicorn --chdir backend rise.wsgi:application`). frontend را با `npm run build` بسازید و `frontend/dist` را static host کنید؛ `VITE_API_URL` را روی origin API بگذارید. DB production را PostgreSQL کنید، backups و monitoring فعال کنید، و Stalwart را فقط روی شبکه خصوصی در دسترس API قرار دهید.
