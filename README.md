@@ -11,3 +11,12 @@ python backend/manage.py migrate && python backend/manage.py runserver
 In another terminal: `cd frontend && npm install && npm run dev`.
 
 See `docs/` for the PRD, threat model, API contract, and deployment guide.
+
+## Run the frontend from the project root
+
+```bash
+npm run install:frontend
+npm run dev
+```
+
+`npm run ve` is also supported as a short alias for the development server.
