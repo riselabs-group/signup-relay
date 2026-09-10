@@ -18,13 +18,13 @@ MIDDLEWARE=['corsheaders.middleware.CorsMiddleware','django.middleware.security.
 ROOT_URLCONF='rise.urls'; WSGI_APPLICATION='rise.wsgi.application'; LOGIN_URL='/admin/login/'
 TEMPLATES=[{'BACKEND':'django.template.backends.django.DjangoTemplates','DIRS':[],'APP_DIRS':True,'OPTIONS':{'context_processors':['django.template.context_processors.request','django.contrib.auth.context_processors.auth','django.contrib.messages.context_processors.messages']}}]
 DATABASES={'default':{'ENGINE':'django.db.backends.sqlite3','NAME':BASE_DIR/'db.sqlite3'}}
-LANGUAGE_CODE='en-us'; TIME_ZONE='UTC'; USE_I18N=True; USE_TZ=True; STATIC_URL='static/'
+LANGUAGE_CODE=os.getenv('LANGUAGE_CODE','fa-ir'); TIME_ZONE=os.getenv('TIME_ZONE','Asia/Tehran'); USE_I18N=True; USE_TZ=True; STATIC_URL='static/'
 CORS_ALLOWED_ORIGINS=os.getenv('CORS_ALLOWED_ORIGINS','http://localhost:5173').split(','); CSRF_TRUSTED_ORIGINS=CORS_ALLOWED_ORIGINS
 DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
 if os.getenv('REDIS_URL'):
  CACHES={'default':{'BACKEND':'django_redis.cache.RedisCache','LOCATION':os.environ['REDIS_URL'],'OPTIONS':{'CLIENT_CLASS':'django_redis.client.DefaultClient'}}}
 REST_FRAMEWORK={'DEFAULT_THROTTLE_CLASSES':['rest_framework.throttling.ScopedRateThrottle'],'DEFAULT_THROTTLE_RATES':{'signup':'5/hour','username':'30/minute','config':'60/minute','blog':'60/minute'}}
-JAZZMIN_SETTINGS={'site_title':'R.I.S.E Control Center','site_header':'R.I.S.E','site_brand':'R.I.S.E Relay','welcome_sign':'Relay operations dashboard','copyright':'R.I.S.E','show_ui_builder':True,'navigation_expanded':True,'icons':{'registration':'fas fa-network-wired','registration.relay':'fas fa-server','registration.blogpost':'fas fa-newspaper','registration.relayaccount':'fas fa-user-shield'}}
-JAZZMIN_UI_TWEAKS={'theme':'darkly','navbar_small_text':False,'footer_small_text':False,'sidebar_nav_small_text':False,'sidebar': 'sidebar-dark-primary','brand_colour':'navbar-success','accent':'accent-success','navbar':'navbar-dark'}
+JAZZMIN_SETTINGS={'site_title':'R.I.S.E Control Center','site_header':'R.I.S.E','site_brand':'R.I.S.E Relay','welcome_sign':'داشبورد مدیریت رله R.I.S.E','copyright':'R.I.S.E','show_ui_builder':True,'navigation_expanded':True,'show_sidebar':True,'topmenu_links':[{'name':'صفحه اصلی','url':'/','permissions':['auth.view_user']},{'name':'API','url':'/api/','permissions':['auth.view_user']},{'name':'مجله','url':'/api/blog/','permissions':['auth.view_user']}],'usermenu_links':[{'name':'صفحه اصلی','url':'/','new_window':False},{'model':'auth.user'}],'icons':{'registration':'fas fa-network-wired','registration.relay':'fas fa-server','registration.blogpost':'fas fa-newspaper','registration.relayaccount':'fas fa-user-shield','auth.user':'fas fa-users-cog','auth.group':'fas fa-user-lock'}}
+JAZZMIN_UI_TWEAKS={'theme':'darkly','navbar_small_text':False,'footer_small_text':False,'sidebar_nav_small_text':False,'navbar_fixed':True,'sidebar_fixed':True,'sidebar':'sidebar-dark-primary','brand_colour':'navbar-success','accent':'accent-success','navbar':'navbar-dark'}
 if not DEBUG:
  SECURE_SSL_REDIRECT=True; SESSION_COOKIE_SECURE=True; CSRF_COOKIE_SECURE=True; SECURE_HSTS_SECONDS=31536000; SECURE_HSTS_INCLUDE_SUBDOMAINS=True; SECURE_CONTENT_TYPE_NOSNIFF=True; X_FRAME_OPTIONS='DENY'
