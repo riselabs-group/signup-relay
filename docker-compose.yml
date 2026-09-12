@@ -1,8 +1,37 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: rise
+      POSTGRES_USER: rise
+      POSTGRES_PASSWORD: change-this-local-password
+    volumes: ["rise-postgres:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rise -d rise"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes: ["rise-redis:/data"]
   api:
     image: python:3.12-slim
     working_dir: /app
     volumes: ["./backend:/app"]
     env_file: [backend/.env]
+    environment:
+      DATABASE_URL: postgresql://rise:change-this-local-password@postgres:5432/rise
+      POSTGRES_DB: rise
+      POSTGRES_USER: rise
+      POSTGRES_PASSWORD: change-this-local-password
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/1
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_started}
     command: sh -c "pip install -r requirements.txt && python manage.py migrate && gunicorn rise.wsgi:application --bind 0.0.0.0:8000"
     ports: ["8000:8000"]
+volumes:
+  rise-postgres:
+  rise-redis:

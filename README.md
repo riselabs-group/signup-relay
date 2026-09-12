@@ -20,3 +20,5 @@ npm run dev
 ```
 
 `npm run ve` is also supported as a short alias for the development server.
+
+To run Django and React together with one command, use `./run-all.sh`.
