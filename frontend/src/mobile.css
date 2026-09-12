@@ -1,0 +1,66 @@
+/* Loaded after the desktop stylesheet. Phone and tablet layouts share one
+   explicit source of sizing, spacing, reading order and touch targets. */
+@media (max-width: 800px) {
+  html, body { background: #edf3ee; }
+  body { overflow-x: visible; }
+  main {
+    width: 100%; max-width: none; margin: 0;
+    padding: 0 max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    background: radial-gradient(ellipse at top, #d9e9df, transparent 480px), #edf3ee;
+    color: #183c2b; min-height: 100svh;
+  }
+  main::before, main::after { display: none; }
+  main > nav {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px;
+    margin: 0 -16px; padding: 16px; border-radius: 0 0 22px 22px;
+    background: #11281f; color: #f3f8ed; align-items: center;
+  }
+  .brand { justify-content: flex-start; min-width: 0; }
+  .brand > span { display: grid; place-items: center; flex-shrink: 0; border-radius: 12px; width: 42px; height: 42px; background: #d8f36a; color: #11281f; }
+  .brand strong { display: block; font-size: 17px; }
+  .brand small { display: none; }
+  .lang { grid-column: 2; grid-row: 1; min-height: 44px; min-width: 64px; margin: 0; }
+  .navlinks { display: flex; grid-column: 1 / -1; grid-row: 2; margin: 0; order: initial; }
+  .navlinks button { width: 100%; min-height: 44px; font: inherit; font-size: 14px; background: #243e30; border: 1px solid #47634c; }
+  .navlinks a { display: none; }
+  .hero { display: flex; flex-direction: column; gap: 24px; padding: 28px 0 36px; margin: 0; min-height: 0; }
+  .copy { order: 0; padding: 8px 0; text-align: start; align-items: stretch; }
+  .copy .eyebrow { color: #416848; letter-spacing: 0; font: inherit; font-size: 12px; text-shadow: none; }
+  .copy h1 { font-size: clamp(34px, 9vw, 48px); line-height: 1.5; letter-spacing: 0; margin: 12px 0; }
+  .copy h1 em { background: none; color: #1c523a; -webkit-text-fill-color: #1c523a; }
+  .copy p { color: #46614f; max-width: none; margin: 0; line-height: 1.9; font-size: 15px; }
+  .copy > .primary { width: 100%; min-height: 52px; margin-top: 20px; background: #214e38; color: white; box-shadow: 0 8px 20px #17392420; }
+  .pills { color: #38583e; margin-top: 16px; justify-content: flex-start; flex-wrap: wrap; font: inherit; font-size: 12px; }
+  .pills svg { color: #31653f; }
+  #signup.card { order: 1; width: 100%; max-width: 560px; align-self: center; margin: 0; padding: 24px 20px; border: 1px solid #d1dfd2; border-radius: 24px; background: #fff; box-shadow: 0 14px 40px #254a3012; scroll-margin-top: 24px; }
+  .card form { gap: 12px; }
+  .card label { font-size: 15px; }
+  .card input { font: inherit; font-size: 16px; min-height: 52px; }
+  .input-row { flex-direction: column; align-items: stretch; overflow: visible; }
+  .input-row input { width: 100%; flex: none; border-radius: 11px 11px 0 0; }
+  .input-row span { width: 100%; max-width: none; padding: 8px 14px; text-align: left; white-space: normal; overflow-wrap: anywhere; border-top: 1px solid #dae5da; font-size: 13px; }
+  .hint { font-size: 12px; line-height: 1.9; }
+  .check { display: flex !important; align-items: flex-start !important; }
+  .check input { flex: 0 0 20px; width: 20px; height: 20px; min-height: 20px; }
+  .progress { margin-bottom: 20px; }
+  .posts { order: initial; width: 100%; margin: 0; padding: 28px 0; background: transparent; color: #183c2b; }
+  .posts h2 { color: #183c2b; font-size: 24px; }
+  .section-head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .section-head button { min-height: 44px; color: #245436; border: 1px solid #b2c7b3; }
+  .post-grid, .all-posts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .posts article, .all-posts article { background: #143426; border: 1px solid #345b42; padding: 24px; border-radius: 20px; color: #f6faef; }
+  .posts article h3, .all-posts article h2 { color: #f6faef; line-height: 1.9; font-size: 19px; }
+  .load-more { width: 100%; min-height: 52px; background: #214e38; color: #fff; }
+  .all-shown { color: #46614f; font: inherit; font-size: 13px; }
+  .blog-hero { padding: 32px 0; }
+  .blog-hero h1, .article h2 { font-size: 30px; line-height: 1.7; }
+  .blog-hero p, .article > p, .article .lead { color: #46614f; }
+  .article { padding: 24px 0; }
+  .article .back-link { color: #245436; }
+  main > footer { order: initial; margin: 32px 0 0; background: transparent; border-top: 1px solid #c4d5c7; padding: 20px 0; color: #46614f; font: inherit; font-size: 12px; }
+}
+@media (min-width: 601px) and (max-width: 800px) {
+  main { padding-inline: 32px; }
+  main > nav { margin-inline: -32px; padding-inline: 32px; }
+  .post-grid, .all-posts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
