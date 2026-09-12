@@ -36,7 +36,10 @@ def config(request):
 @api_view(['GET'])
 @throttle_classes([BlogThrottle])
 def blog(request):
- return Response([{'title':p.title,'slug':p.slug,'excerpt':p.excerpt,'content':p.content,'cover_url':p.cover_url,'published_at':p.published_at} for p in BlogPost.objects.filter(published=True)])
+ posts=list(BlogPost.objects.filter(published=True))
+ if not posts:
+  return Response([{'title':'R.I.S.E Journal','slug':'rise-journal','excerpt':'Stories about privacy, open communication and Delta Chat.','content':'Welcome to the R.I.S.E Journal.','cover_url':'','published_at':None}])
+ return Response([{'title':p.title,'slug':p.slug,'excerpt':p.excerpt,'content':p.content,'cover_url':p.cover_url,'published_at':p.published_at} for p in posts])
 @api_view(['GET'])
 @throttle_classes([UsernameThrottle])
 def username(request,value): return Response({'available':not RelayAccount.objects.filter(username=value.lower(),domain=relay_domain()).exists()})
