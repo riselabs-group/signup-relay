@@ -15,7 +15,7 @@ except ImportError:
 SECRET_KEY=os.getenv('DJANGO_SECRET_KEY','dev-only-change-me'); DEBUG=os.getenv('DJANGO_DEBUG','true').lower()=='true'
 if not DEBUG and SECRET_KEY in {'dev-only-change-me','local-only-change-this',''}: raise RuntimeError('DJANGO_SECRET_KEY must be set to a strong value when DEBUG=false')
 ALLOWED_HOSTS=os.getenv('ALLOWED_HOSTS','localhost,127.0.0.1').split(',')
-INSTALLED_APPS=(['jazzmin'] if importlib.util.find_spec('jazzmin') else [])+['django.contrib.admin','django.contrib.auth','django.contrib.contenttypes','django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles','corsheaders','rest_framework','registration']
+INSTALLED_APPS=(['jazzmin'] if importlib.util.find_spec('jazzmin') else [])+['django.contrib.admin','django.contrib.auth','django.contrib.contenttypes','django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles','corsheaders','rest_framework','rest_framework.authtoken','registration']
 MIDDLEWARE=['corsheaders.middleware.CorsMiddleware','django.middleware.security.SecurityMiddleware','django.contrib.sessions.middleware.SessionMiddleware','django.middleware.locale.LocaleMiddleware','django.middleware.common.CommonMiddleware','django.middleware.csrf.CsrfViewMiddleware','django.contrib.auth.middleware.AuthenticationMiddleware','django.contrib.messages.middleware.MessageMiddleware']
 ROOT_URLCONF='rise.urls'; WSGI_APPLICATION='rise.wsgi.application'; LOGIN_URL='/admin/login/'
 TEMPLATES=[{'BACKEND':'django.template.backends.django.DjangoTemplates','DIRS':[],'APP_DIRS':True,'OPTIONS':{'context_processors':['django.template.context_processors.request','django.contrib.auth.context_processors.auth','django.contrib.messages.context_processors.messages']}}]
@@ -28,7 +28,11 @@ DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
 AUTH_PASSWORD_VALIDATORS=[{'NAME':'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},{'NAME':'django.contrib.auth.password_validation.MinimumLengthValidator','OPTIONS':{'min_length':12}},{'NAME':'django.contrib.auth.password_validation.CommonPasswordValidator'},{'NAME':'django.contrib.auth.password_validation.NumericPasswordValidator'}]
 if os.getenv('REDIS_URL'):
  CACHES={'default':{'BACKEND':'django_redis.cache.RedisCache','LOCATION':os.environ['REDIS_URL'],'OPTIONS':{'CLIENT_CLASS':'django_redis.client.DefaultClient'}}}
-REST_FRAMEWORK={'DEFAULT_THROTTLE_CLASSES':['rest_framework.throttling.ScopedRateThrottle'],'DEFAULT_THROTTLE_RATES':{'signup':'5/hour','username':'30/minute','config':'60/minute','blog':'60/minute'}}
+REST_FRAMEWORK={
+ 'DEFAULT_AUTHENTICATION_CLASSES':['rest_framework.authentication.TokenAuthentication'],
+ 'DEFAULT_THROTTLE_CLASSES':['rest_framework.throttling.ScopedRateThrottle'],
+ 'DEFAULT_THROTTLE_RATES':{'signup':'5/hour','username':'30/minute','config':'60/minute','blog':'60/minute','auth':'10/hour','mailbox':'30/hour'},
+}
 JAZZMIN_SETTINGS={'site_title':'R.I.S.E Control Center','site_header':'R.I.S.E','site_brand':'R.I.S.E Relay','welcome_sign':'داشبورد مدیریت رله R.I.S.E','copyright':'R.I.S.E','show_ui_builder':True,'navigation_expanded':True,'show_sidebar':True,'language_chooser':True,'topmenu_links':[{'name':'صفحه اصلی','url':'/','permissions':['auth.view_user']},{'name':'API','url':'/api/','permissions':['auth.view_user']},{'name':'Blog','url':'/api/blog/','permissions':['auth.view_user']}],'usermenu_links':[{'name':'صفحه اصلی','url':'/','new_window':False},{'model':'auth.user'}],'icons':{'registration':'fas fa-network-wired','registration.relay':'fas fa-server','registration.blogpost':'fas fa-newspaper','registration.relayaccount':'fas fa-user-shield','auth.user':'fas fa-users-cog','auth.group':'fas fa-user-lock'}}
 JAZZMIN_UI_TWEAKS={'theme':'darkly','navbar_small_text':False,'footer_small_text':False,'sidebar_nav_small_text':False,'navbar_fixed':True,'sidebar_fixed':True,'sidebar':'sidebar-dark-primary','brand_colour':'navbar-success','accent':'accent-success','navbar':'navbar-dark'}
 if not DEBUG:

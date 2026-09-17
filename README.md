@@ -1,6 +1,6 @@
 # R.I.S.E Relay Registration
 
-Secure, multi-relay Delta Chat account registration with a Django API and React UI. The central service provisions accounts in Stalwart; relay VPS instances proxy traffic through an encrypted tunnel.
+Secure, multi-relay Delta Chat and business-mail registration with a Django API and React UI. The central service provisions accounts through Stalwart's management JMAP API; relay VPS instances proxy traffic through an encrypted tunnel.
 
 ## Quick start
 ```bash
@@ -22,3 +22,7 @@ npm run dev
 `npm run ve` is also supported as a short alias for the development server.
 
 To run Django and React together with one command, use `./run-all.sh`.
+
+## Business mail API
+
+The product now separates a Django product user from a Stalwart mailbox. Register/login through `/api/auth/`, choose a managed domain from `/api/domains/`, then create and manage owned mailboxes at `/api/mailboxes/`. See [the API contract](docs/API.md) and [architecture](docs/ARCHITECTURE.md). Local development is intentionally safe: `STALWART_DRY_RUN=true` means no real Stalwart account is created.
