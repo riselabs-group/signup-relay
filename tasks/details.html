@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stalwart Suite — نقشه‌راه کامل پروژه</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --bg:#080b14;
+    --bg-2:#0c1120;
+    --sidebar:#0a0f1c;
+    --card:#111829;
+    --card-2:#161f34;
+    --border:#1f2a44;
+    --border-2:#2a3854;
+    --text:#e8eef9;
+    --muted:#8b98b3;
+    --muted-2:#6b7894;
+    --blue:#5b9dff;
+    --purple:#a06bff;
+    --green:#2dd4a7;
+    --orange:#ff9d4d;
+    --pink:#ff5c8a;
+    --yellow:#f5c451;
+    --red:#ff4d6d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Vazirmatn',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.85;
+    font-size:15px;
+    overflow-x:hidden;
+  }
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:var(--bg-2)}
+  ::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:8px}
+  ::-webkit-scrollbar-thumb:hover{background:#3a4a6a}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* LAYOUT */
+  .app{
+    display:grid;
+    grid-template-columns:290px 1fr;
+    min-height:100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar{
+    background:linear-gradient(180deg,var(--sidebar),#070a14);
+    border-left:1px solid var(--border);
+    padding:24px 16px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 8px 20px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:12px;
+  }
+  .brand-logo{
+    width:42px;height:42px;
+    border-radius:12px;
+    background:linear-gradient(135deg,var(--purple),var(--blue));
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.3rem;
+    box-shadow:0 8px 24px rgba(124,92,255,.35);
+  }
+  .brand-text h1{
+    font-size:1rem;
+    font-weight:800;
+    background:linear-gradient(120deg,#fff,#a06bff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    line-height:1.3;
+  }
+  .brand-text p{font-size:.72rem;color:var(--muted-2);line-height:1.3}
+
+  .nav-section{
+    font-size:.7rem;
+    font-weight:700;
+    letter-spacing:1px;
+    color:var(--muted-2);
+    text-transform:uppercase;
+    padding:16px 10px 6px;
+  }
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 12px;
+    border-radius:10px;
+    color:#c5cfe0;
+    font-size:.88rem;
+    font-weight:500;
+    cursor:pointer;
+    transition:.15s;
+    border:1px solid transparent;
+    user-select:none;
+  }
+  .nav-item:hover{background:var(--card);color:#fff;border-color:var(--border)}
+  .nav-item.active{
+    background:linear-gradient(135deg,rgba(91,157,255,.15),rgba(124,92,255,.1));
+    color:#fff;
+    border-color:rgba(91,157,255,.35);
+  }
+  .nav-item .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--tc,var(--blue));
+    flex-shrink:0;
+    box-shadow:0 0 8px var(--tc,var(--blue));
+  }
+  .nav-item .nav-label{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .nav-item .nav-id{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.65rem;
+    color:var(--muted-2);
+    direction:ltr;
+  }
+  .nav-item .nav-progress{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    color:var(--muted);
+    background:var(--bg-2);
+    padding:1px 7px;
+    border-radius:6px;
+    border:1px solid var(--border);
+  }
+  .nav-item.done .nav-progress{
+    color:var(--green);
+    border-color:rgba(45,212,167,.4);
+    background:rgba(45,212,167,.08);
+  }
+
+  .sidebar-footer{
+    margin-top:auto;
+    padding-top:16px;
+    border-top:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .mini-progress{
+    padding:10px 12px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+  }
+  .mini-progress-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:.75rem;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .mini-progress-label b{color:var(--text);font-weight:700}
+  .bar{
+    height:6px;
+    background:var(--bg-2);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .bar > div{
+    height:100%;
+    background:linear-gradient(90deg,var(--green),var(--blue));
+    border-radius:6px;
+    transition:width .4s;
+  }
+  .sidebar-actions{
+    display:flex;
+    gap:6px;
+  }
+  .btn{
+    padding:8px 12px;
+    border-radius:10px;
+    font-family:inherit;
+    font-size:.8rem;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:#c5cfe0;
+    transition:.15s;
+    flex:1;
+    text-align:center;
+  }
+  .btn:hover{background:var(--card-2);color:#fff;border-color:var(--border-2)}
+  .btn-primary{
+    background:linear-gradient(135deg,var(--blue),var(--purple));
+    color:#fff;
+    border-color:transparent;
+  }
+  .btn-primary:hover{filter:brightness(1.1)}
+  .btn-danger:hover{color:var(--red);border-color:rgba(255,77,109,.4)}
+
+  /* MAIN */
+  .main{
+    padding:40px 48px 80px;
+    max-width:1100px;
+    width:100%;
+  }
+
+  /* HERO */
+  .hero{
+    padding:20px 0 40px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:36px;
+  }
+  .hero-badge{
+    display:inline-block;
+    padding:5px 14px;
+    border-radius:999px;
+    background:rgba(124,92,255,.1);
+    border:1px solid rgba(124,92,255,.3);
+    color:var(--purple);
+    font-size:12px;
+    font-weight:600;
+    margin-bottom:16px;
+  }
+  .hero h2{
+    font-size:clamp(1.8rem,3.5vw,2.6rem);
+    font-weight:800;
+    line-height:1.2;
+    background:linear-gradient(120deg,#fff 20%,#7c5cff 60%,#5b9dff 90%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin-bottom:14px;
+  }
+  .hero p{color:var(--muted);max-width:720px;font-size:1rem}
+
+  /* VIEW */
+  .view{animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .view-head{
+    display:flex;
+    align-items:flex-start;
+    gap:20px;
+    margin-bottom:32px;
+    flex-wrap:wrap;
+  }
+  .back-btn{
+    padding:9px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:#c5cfe0;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:.85rem;
+    font-weight:600;
+    transition:.15s;
+    flex-shrink:0;
+  }
+  .back-btn:hover{background:var(--card-2);color:#fff}
+
+  .task-title-block{flex:1;min-width:260px}
+  .task-title-block h2{
+    font-size:1.9rem;
+    font-weight:800;
+    margin-bottom:6px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .task-title-block .tnum{
+    width:44px;height:44px;
+    border-radius:12px;
+    background:color-mix(in srgb, var(--tc) 15%, transparent);
+    border:1px solid color-mix(in srgb, var(--tc) 40%, transparent);
+    color:var(--tc);
+    font-weight:800;
+    font-size:1.15rem;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .task-title-block .meta{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+  .meta-chip{
+    font-size:.75rem;
+    padding:3px 10px;
+    border-radius:8px;
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--muted);
+  }
+  .meta-chip.id{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--tc);
+    border-color:color-mix(in srgb, var(--tc) 30%, transparent);
+    background:color-mix(in srgb, var(--tc) 8%, transparent);
+  }
+
+  .task-goal-box{
+    background:linear-gradient(135deg,color-mix(in srgb, var(--tc) 8%, transparent), transparent);
+    border:1px solid color-mix(in srgb, var(--tc) 25%, transparent);
+    border-radius:14px;
+    padding:20px 22px;
+    margin-bottom:28px;
+    position:relative;
+  }
+  .task-goal-box::before{
+    content:'هدف';
+    position:absolute;
+    top:-10px;right:22px;
+    font-size:.7rem;
+    font-weight:700;
+    padding:2px 10px;
+    border-radius:6px;
+    background:var(--tc);
+    color:#0a0e1a;
+  }
+  .task-goal-box p{font-size:1rem;color:#dde6f5;font-weight:500}
+
+  .detail-section{margin-bottom:36px}
+  .detail-section h3{
+    font-size:1.15rem;
+    font-weight:700;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+  }
+  .detail-section h3 .ic{
+    width:32px;height:32px;
+    border-radius:9px;
+    background:var(--card);
+    border:1px solid var(--border);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.95rem;
+  }
+  .detail-section .count{
+    margin-right:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.8rem;
+    color:var(--muted);
+    background:var(--card);
+    padding:2px 10px;
+    border-radius:8px;
+    border:1px solid var(--border);
+  }
+
+  /* SUBTASKS */
+  .subtasks{display:flex;flex-direction:column;gap:8px}
+  .subtask{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:13px 16px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    cursor:pointer;
+    transition:.15s;
+    user-select:none;
+  }
+  .subtask:hover{border-color:var(--border-2);background:var(--card-2)}
+  .subtask.checked{
+    background:linear-gradient(90deg,rgba(45,212,167,.06),var(--card));
+    border-color:rgba(45,212,167,.3);
+  }
+  .subtask.checked .st-text{
+    color:var(--muted);
+    text-decoration:line-through;
+    text-decoration-color:rgba(45,212,167,.5);
+  }
+  .checkbox{
+    width:20px;height:20px;
+    border-radius:6px;
+    border:2px solid var(--border-2);
+    flex-shrink:0;
+    margin-top:2px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.15s;
+    background:var(--bg-2);
+  }
+  .subtask.checked .checkbox{
+    background:var(--green);
+    border-color:var(--green);
+    color:#0a0e1a;
+  }
+  .checkbox svg{width:12px;height:12px;display:none}
+  .subtask.checked .checkbox svg{display:block}
+  .st-text{font-size:.92rem;color:#d5deee;line-height:1.6;flex:1}
+  .st-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.7rem;
+    color:var(--muted-2);
+    margin-left:auto;
+    align-self:center;
+  }
+
+  /* DOCS */
+  .docs-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:10px;
+  }
+  .doc-link{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 14px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    transition:.15s;
+    color:#d5deee;
+    text-decoration:none;
+    font-size:.88rem;
+    font-weight:500;
+  }
+  .doc-link:hover{
+    background:var(--card-2);
+    border-color:var(--blue);
+    color:#fff;
+    text-decoration:none;
+    transform:translateY(-2px);
+  }
+  .doc-link .arrow{
+    margin-right:auto;
+    color:var(--muted-2);
+    font-size:1rem;
+    transition:.15s;
+  }
+  .doc-link:hover .arrow{color:var(--blue);transform:translateX(-3px)}
+
+  /* QUESTIONS */
+  .questions{display:flex;flex-direction:column;gap:10px}
+  .question{
+    padding:14px 18px;
+    background:linear-gradient(90deg,rgba(245,196,81,.06),var(--card));
+    border:1px solid rgba(245,196,81,.25);
+    border-right:3px solid var(--yellow);
+    border-radius:10px;
+    font-size:.92rem;
+    color:#e8dfc5;
+    line-height:1.7;
+  }
+  .question::before{
+    content:'؟';
+    color:var(--yellow);
+    font-weight:800;
+    margin-left:8px;
+    font-size:1.05rem;
+  }
+
+  /* TIPS */
+  .tips{display:flex;flex-direction:column;gap:10px}
+  .tip{
+    padding:14px 18px;
+    background:linear-gradient(90deg,rgba(91,157,255,.06),var(--card));
+    border:1px solid rgba(91,157,255,.2);
+    border-right:3px solid var(--blue);
+    border-radius:10px;
+    font-size:.92rem;
+    color:#cddaf0;
+    line-height:1.7;
+  }
+  .tip::before{
+    content:'💡';
+    margin-left:8px;
+  }
+
+  /* OUTPUT */
+  .output-box{
+    padding:20px 22px;
+    background:linear-gradient(135deg,rgba(45,212,167,.08),rgba(45,212,167,.02));
+    border:1px solid rgba(45,212,167,.3);
+    border-radius:14px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .output-box .ok{
+    width:36px;height:36px;
+    border-radius:10px;
+    background:var(--green);
+    color:#0a0e1a;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+    font-size:1.1rem;
+    flex-shrink:0;
+  }
+  .output-box .body{flex:1}
+  .output-box .lbl{font-size:.75rem;color:var(--green);font-weight:700;margin-bottom:4px;letter-spacing:.5px}
+  .output-box p{color:#b8e6d6;font-size:.95rem}
+
+  /* DEPENDENCIES */
+  .deps{display:flex;flex-wrap:wrap;gap:8px}
+  .dep{
+    padding:6px 12px;
+    border-radius:8px;
+    background:var(--card);
+    border:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace;
+    font-size:.78rem;
+    color:#c5cfe0;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .dep:hover{
+    border-color:var(--purple);
+    color:var(--purple);
+    background:rgba(160,107,255,.08);
+  }
+
+  /* DASHBOARD */
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+    margin-bottom:36px;
+  }
+  .stat{
+    padding:20px 22px;
+    background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--border);
+    border-radius:14px;
+    position:relative;
+    overflow:hidden;
+  }
+  .stat::before{
+    content:'';
+    position:absolute;
+    top:0;right:0;left:0;
+    height:2px;
+    background:var(--sc,var(--blue));
+  }
+  .stat .num{
+    font-size:2rem;
+    font-weight:800;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--sc,var(--blue));
+    line-height:1;
+    margin-bottom:6px;
+  }
+  .stat .lbl{
+    font-size:.82rem;
+    color:var(--muted);
+  }
+
+  .filter-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:24px;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    padding:7px 14px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:#c5cfe0;
+    font-family:inherit;
+    font-size:.82rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .filter-btn:hover{border-color:var(--border-2)}
+  .filter-btn.active{
+    background:linear-gradient(135deg,var(--blue),var(--purple));
+    color:#fff;
+    border-color:transparent;
+  }
+
+  .cards-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
+    gap:18px;
+  }
+  .card{
+    background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    cursor:pointer;
+    transition:.2s;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .card::before{
+    content:'';
+    position:absolute;
+    top:0;right:0;left:0;
+    height:3px;
+    background:var(--tc,var(--blue));
+  }
+  .card:hover{
+    transform:translateY(-4px);
+    border-color:color-mix(in srgb, var(--tc) 40%, transparent);
+    box-shadow:0 20px 50px -25px var(--tc);
+  }
+  .card-head{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .card-num{
+    width:38px;height:38px;
+    border-radius:10px;
+    background:color-mix(in srgb, var(--tc) 15%, transparent);
+    border:1px solid color-mix(in srgb, var(--tc) 40%, transparent);
+    color:var(--tc);
+    font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    font-size:1rem;
+  }
+  .card-head h3{
+    font-size:1.1rem;
+    font-weight:700;
+    line-height:1.3;
+    margin-bottom:2px;
+  }
+  .card-id{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    color:var(--muted-2);
+    direction:ltr;
+  }
+  .card-goal{
+    font-size:.85rem;
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .card-foot{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:auto;
+    padding-top:12px;
+    border-top:1px dashed var(--border);
+    font-size:.78rem;
+    color:var(--muted);
+  }
+  .card-foot .prog-num{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--tc);
+    font-weight:700;
+  }
+  .card-foot .mini-bar{
+    flex:1;
+    height:5px;
+    background:var(--bg-2);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .card-foot .mini-bar > div{
+    height:100%;
+    background:var(--tc);
+    border-radius:4px;
+  }
+
+  /* DIAGRAM */
+  .diagram-wrap{
+    background:linear-gradient(180deg,var(--card),var(--bg-2));
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:32px 20px;
+    overflow-x:auto;
+  }
+  .mermaid{display:flex;justify-content:center;min-width:max-content}
+
+  /* TEAM */
+  .team-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+  }
+  .member{
+    background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:26px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .member::after{
+    content:'';
+    position:absolute;
+    inset:auto 0 0 0;
+    height:4px;
+    background:var(--mc);
+  }
+  .avatar{
+    width:60px;height:60px;
+    border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;
+    background:color-mix(in srgb, var(--mc) 15%, transparent);
+    border:1px solid color-mix(in srgb, var(--mc) 40%, transparent);
+    margin-bottom:14px;
+  }
+  .member h3{font-size:1.1rem;margin-bottom:4px}
+  .member .role{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.7rem;
+    padding:4px 10px;
+    border-radius:999px;
+    background:color-mix(in srgb, var(--mc) 12%, transparent);
+    border:1px solid color-mix(in srgb, var(--mc) 35%, transparent);
+    color:var(--mc);
+    direction:ltr;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .chip:hover{background:color-mix(in srgb, var(--mc) 25%, transparent)}
+
+  /* KPI STRIP */
+  .kpi-strip{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:16px 20px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    margin-bottom:24px;
+    flex-wrap:wrap;
+  }
+  .kpi-strip .kpi-item{
+    display:flex;align-items:center;gap:8px;
+    font-size:.85rem;color:var(--muted);
+  }
+  .kpi-strip .kpi-item b{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--text);
+    font-weight:700;
+  }
+
+  /* SEARCH */
+  .search-box{
+    padding:10px 14px;
+    border-radius:10px;
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:inherit;
+    font-size:.9rem;
+    width:100%;
+    max-width:340px;
+    transition:.15s;
+    margin-bottom:20px;
+  }
+  .search-box:focus{
+    outline:none;
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(91,157,255,.15);
+  }
+  .search-box::placeholder{color:var(--muted-2)}
+
+  /* RESPONSIVE */
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr}
+    .sidebar{
+      position:relative;
+      height:auto;
+      border-left:none;
+      border-bottom:1px solid var(--border);
+      max-height:none;
+    }
+    .main{padding:28px 20px 60px}
+    .task-title-block h2{font-size:1.4rem}
+    .task-title-block .tnum{width:36px;height:36px;font-size:.95rem}
+  }
+
+  /* EMPTY */
+  .empty{
+    text-align:center;
+    padding:80px 20px;
+    color:var(--muted);
+  }
+  .empty .big{font-size:3rem;margin-bottom:14px;opacity:.5}
+
+  /* TOAST */
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(120%);
+    background:var(--card);
+    border:1px solid var(--green);
+    color:var(--green);
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:.88rem;
+    font-weight:600;
+    transition:.35s cubic-bezier(.16,1,.3,1);
+    z-index:1000;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🛡️</div>
+      <div class="brand-text">
+        <h1>Stalwart Suite</h1>
+        <p>نقشه‌راه کامل پروژه</p>
+      </div>
+    </div>
+
+    <div class="nav-section">عمومی</div>
+    <div class="nav-item" data-view="dashboard">
+      <span class="dot" style="--tc:#5b9dff"></span>
+      <span class="nav-label">داشبورد</span>
+      <span class="nav-id">🏠</span>
+    </div>
+    <div class="nav-item" data-view="architecture">
+      <span class="dot" style="--tc:#a06bff"></span>
+      <span class="nav-label">معماری</span>
+      <span class="nav-id">🧭</span>
+    </div>
+    <div class="nav-item" data-view="workflow">
+      <span class="dot" style="--tc:#ff9d4d"></span>
+      <span class="nav-label">چرخهٔ Task</span>
+      <span class="nav-id">🔄</span>
+    </div>
+    <div class="nav-item" data-view="team">
+      <span class="dot" style="--tc:#2dd4a7"></span>
+      <span class="nav-label">تقسیم کار</span>
+      <span class="nav-id">👥</span>
+    </div>
+
+    <div class="nav-section">Tasks</div>
+    <div id="nav-tasks"></div>
+
+    <div class="sidebar-footer">
+      <div class="mini-progress">
+        <div class="mini-progress-label">
+          <span>پیشرفت کلی</span>
+          <b id="global-progress-label">۰٪</b>
+        </div>
+        <div class="bar"><div id="global-progress-bar" style="width:0%"></div></div>
+      </div>
+      <div class="sidebar-actions">
+        <button class="btn" onclick="exportProgress()">📤 Export</button>
+        <button class="btn" onclick="importProgress()">📥 Import</button>
+        <button class="btn btn-danger" onclick="resetProgress()">↺ Reset</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+    <div id="view-root"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="import-file" accept=".json" style="display:none">
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA — تمام محتوای پروژه
+   ═══════════════════════════════════════════════════════════ */
+
+const TASKS = [
+  {
+    id:'AUTH-01', num:'۱', title:'Authentication', titleFa:'احراز هویت',
+    color:'#5b9dff', owner:'نفر ۱ — Core / Mail',
+    goal:'اتصال React SPA به سیستم احراز هویت Stalwart به‌صورت امن، استاندارد و قابل تست.',
+    description:'React SPA نمی‌تواند مثل یک کلاینت سنتی با Session Cookie کار کند (CORS، ذخیره‌سازی، نبود Same-Site). باید از OAuth2/PKCE یا Bearer Token استفاده کنیم. این Task پایهٔ همهٔ Taskهای دیگر است؛ بدون آن هیچ درخواستی به Stalwart نمی‌رسد.',
+    subtasks:[
+      'بررسی تمام روش‌های Auth موجود در Stalwart (Basic, Bearer, OAuth2, API Key)',
+      'مطالعهٔ OAuth2 Client Model در Stalwart و ساختار Redirect URI',
+      'بررسی امکان استفاده از PKCE برای SPA (بدون client_secret)',
+      'بررسی CORS و Allowed Origins در HTTP Listener',
+      'تصمیم‌گیری: OAuth2 vs Basic+Token vs Reverse Proxy',
+      'ساخت و تعریف OAuth Client در Stalwart',
+      'مشخص کردن Login Flow نهایی (endpointها، پارامترها، ریدایرکت‌ها)',
+      'مشخص کردن Token Flow (access token، refresh token، expiration، scope)',
+      'پیاده‌سازی Login در React',
+      'پیاده‌سازی Logout و پاکسازی کامل توکن‌ها',
+      'پیاده‌سازی Silent Refresh قبل از انقضای توکن',
+      'پیاده‌سازی Auth Interceptor برای 401/403',
+      'تصمیم‌گیری محل ذخیرهٔ امن توکن (memory vs sessionStorage vs httpOnly cookie)',
+      'تست کامل Auth با Stalwart واقعی (نه mock)'
+    ],
+    docs:[
+      {t:'Authentication', u:'https://stalw.art/docs/auth/'},
+      {t:'OAuth Clients', u:'https://stalw.art/docs/auth/oauth/oauth-client/'},
+      {t:'HTTP Service', u:'https://stalw.art/docs/http/'}
+    ],
+    questions:[
+      'آیا SPA می‌تواند PKCE بدون client_secret انجام دهد؟ در Stalwart چطور تعریف می‌شود؟',
+      'Refresh Token داریم یا فقط Access Token کوتاه‌مدت؟',
+      'توکن کجا ذخیره شود؟ (اگر localStorage → خطر XSS، اگر memory → از دست رفتن در refresh صفحه)',
+      'آیا Reverse Proxy برای httpOnly cookie لازم است یا می‌توان مستقیم به Stalwart زد؟',
+      'Allowed Origins چطور تنظیم می‌شود؟',
+      'چه اتفاقی می‌افتد وقتی توکن در میانهٔ کار expire شود؟'
+    ],
+    tips:[
+      'قبل از هر کدنویسی، حتماً مستندات رسمی OAuth را کامل بخوان — استاندارد است و انحراف از آن پرهزینه است.',
+      'برای SPA، Authorization Code + PKCE استاندارد طلایی است. Implicit Flow منسوخ است.',
+      'همهٔ درخواست‌های JMAP/WebDAV بعداً از همین توکن استفاده می‌کنند؛ پس Interceptor را از همان ابتدا درست بنویس.'
+    ],
+    output:'یک Login Flow کاملاً مشخص، مستند و تست‌شده برای React (به‌همراه Interceptor، Refresh، Logout).',
+    dependsOn:[]
+  },
+  {
+    id:'USER-01', num:'۲', title:'Users & Accounts', titleFa:'کاربران و حساب‌ها',
+    color:'#5b9dff', owner:'نفر ۱ — Core / Mail',
+    goal:'ساخت و مدیریت کامل چرخهٔ عمر حساب‌های کاربران در Stalwart از طریق Management API.',
+    description:'مدیریت کاربران قلب Admin Panel است. تمام عملیات باید از طریق Management JMAP یا HTTP API خود Stalwart انجام شود — نه دیتابیس مستقیم و نه Backend واسط.',
+    subtasks:[
+      'مطالعهٔ مفهوم Account در مدل داده‌ای Stalwart',
+      'یافتن API ساخت User جدید (POST/PATCH در Management)',
+      'یافتن API تغییر اطلاعات User (نام، ایمیل، ...)',
+      'یافتن API تغییر Password و سیاست‌های Password',
+      'یافتن API برای Suspend و Resume کردن حساب',
+      'یافتن API برای Delete کردن حساب',
+      'بررسی پیامدهای Delete (Mailboxes، Files، Calendarهای کاربر)',
+      'بررسی API برای چک کردن Username availability',
+      'بررسی Rate Limiting روی ساخت حساب',
+      'تست کامل تمام عملیات روی Stalwart واقعی',
+      'مستندسازی هر عملیات با نمونهٔ request/response'
+    ],
+    docs:[
+      {t:'Management Overview', u:'https://stalw.art/docs/management/'},
+      {t:'Management API Reference', u:'https://stalw.art/docs/ref/'},
+      {t:'API Endpoints', u:'https://stalw.art/docs/development/api/'}
+    ],
+    questions:[
+      'آیا Delete کردن User به‌صورت Hard است یا Soft؟',
+      'آیا Suspend کردن، Mail دریافت را متوقف می‌کند یا فقط Login را؟',
+      'Username availability چطور چک می‌شود؟ آیا endpoint اختصاصی دارد؟',
+      'آیا به‌ازای هر User به‌طور خودکار Mailbox پیش‌فرض ساخته می‌شود؟'
+    ],
+    tips:[
+      'قبل از ساخت User، حتماً بررسی کن که آیا Stalwart خودش Mailbox/Inbox پیش‌فرض می‌سازد یا نه.',
+      'برای Delete امن، احتمالاً باید ابتدا Backup یا Export بگیریم.',
+      'تمام عملیات را در یک فایل مستندات داخلی ثبت کن (برای نفرات دیگر تیم).'
+    ],
+    output:'مشخص شدن API دقیق هر عملیات + تست کامل روی Stalwart + مستندات داخلی.',
+    dependsOn:['AUTH-01']
+  },
+  {
+    id:'MAIL-01', num:'۳', title:'Mail', titleFa:'ایمیل',
+    color:'#5b9dff', owner:'نفر ۱ — Core / Mail',
+    goal:'ساخت یک سیستم Mail کامل در React که فقط با JMAP به Stalwart وصل شود.',
+    description:'JMAP پروتکل اصلی Mail در Stalwart است و جای IMAP/SMTP را می‌گیرد. تمام Flow (Session, Mailboxes, Emails, Send, Draft) از طریق JMAP انجام می‌شود و هیچ Backend واسطی نیاز نیست.',
+    subtasks:[
+      'مطالعهٔ کامل JMAP Core Specification',
+      'پیاده‌سازی اتصال به JMAP endpoint',
+      'دریافت Session و کشف capabilities',
+      'دریافت Account و آیدی آن',
+      'دریافت لیست Mailboxها و ساختار سلسله‌مراتبی',
+      'نمایش لیست Emailها با pagination',
+      'پیاده‌سازی Search پیشرفته (from, to, subject, date, body)',
+      'پیاده‌سازی Read/Unread و flagگذاری',
+      'پیاده‌سازی Send با Attachment',
+      'پیاده‌سازی Reply و Reply All',
+      'پیاده‌سازی Forward',
+      'پیاده‌سازی Draft (ذخیره، بازیابی، حذف)',
+      'پیاده‌سازی Delete / Trash / Archive',
+      'پیاده‌سازی آپلود و دانلود Attachment',
+      'تست کامل Mail Flow از React تا Stalwart'
+    ],
+    docs:[
+      {t:'JMAP Documentation', u:'https://stalw.art/docs/jmap/'},
+      {t:'HTTP Service', u:'https://stalw.art/docs/http/'}
+    ],
+    questions:[
+      'آیا Push (EventSource) برای Mail در Stalwart فعال است؟ اگر بله، چطور استفاده کنیم؟',
+      'Attachment چطور آپلود می‌شود؟ (Blob upload یا Multipart؟)',
+      'آیا IDها در JMAP پایدار هستند یا ممکن است عوض شوند؟',
+      'چطور Threads را نمایش دهیم؟'
+    ],
+    tips:[
+      'JMAP از batching پشتیبانی می‌کند — چند درخواست را در یک HTTP request بفرست تا سرعت بگیرد.',
+      'از `Email/query` به‌همراه `Email/get` برای کارایی بهینه استفاده کن.',
+      'برای Attachmentهای بزرگ، از `Blob/copy` و streaming استفاده کن، نه base64.'
+    ],
+    output:'Mail Flow کامل از React تا Stalwart: Send, Reply, Forward, Draft, Attachment.',
+    dependsOn:['AUTH-01']
+  },
+  {
+    id:'CAL-01', num:'۴', title:'Calendar', titleFa:'تقویم',
+    color:'#a06bff', owner:'نفر ۲ — Collaboration',
+    goal:'افزودن تقویم کامل با انتخاب دقیق Protocol (JMAP Calendar vs CalDAV).',
+    description:'JMAP Calendar در حال استانداردسازی است و ممکن است در Stalwart پوشش کاملی نداشته باشد. اگر ناقص بود، باید به CalDAV سوئیچ کنیم. تصمیم درست اینجاست که پروژه را نجات می‌دهد.',
+    subtasks:[
+      'بررسی پشتیبانی JMAP Calendar در Stalwart (JSCalendar)',
+      'اگر JMAP کامل نبود، بررسی CalDAV',
+      'دریافت لیست Calendarها',
+      'دریافت Eventها با بازهٔ زمانی',
+      'ساخت Event جدید (Single)',
+      'ویرایش Event',
+      'حذف Event',
+      'پیاده‌سازی Recurrence Rules (RRULE)',
+      'پیاده‌سازی Eventهای Recurring و Exceptionها',
+      'بررسی Invitation / Scheduling / Attendees',
+      'پیاده‌سازی Reminder / Alarm',
+      'تصمیم نهایی: JMAP یا CalDAV',
+      'تست کامل روی Stalwart'
+    ],
+    docs:[
+      {t:'HTTP Overview', u:'https://stalw.art/docs/http/'},
+      {t:'WebDAV / CalDAV / CardDAV', u:'https://stalw.art/docs/http/webdav/'},
+      {t:'JMAP Documentation', u:'https://stalw.art/docs/jmap/'}
+    ],
+    questions:[
+      'آیا JMAP Calendar در Stalwart stable است یا experimental؟',
+      'Recurrence چطور ذخیره می‌شود؟ (RRULE استاندارد یا JSCalendar JSON؟)',
+      'Scheduling و Invitation از JMAP پشتیبانی می‌شود یا فقط CalDAV؟',
+      'Timezone handling چطور است؟'
+    ],
+    tips:[
+      'Recurrence سخت‌ترین بخش Calendar است — قبل از کدنویسی یک library معتبر (rrule.js) انتخاب کن.',
+      'اگر JMAP ناقص بود، فوراً به CalDAV سوئیچ نکن — ابتدا ببین آیا Workaround هست.',
+      'برای Calendar، Cache محلی (IndexedDB) خیلی کمک می‌کند.'
+    ],
+    output:'مشخص شدن دقیق Protocol و API نهایی برای Calendar + پیاده‌سازی تست‌شده.',
+    dependsOn:['AUTH-01']
+  },
+  {
+    id:'CONTACT-01', num:'۵', title:'Contacts', titleFa:'مخاطبین',
+    color:'#a06bff', owner:'نفر ۲ — Collaboration',
+    goal:'مدیریت کامل مخاطبین با انتخاب JMAP Contacts یا CardDAV.',
+    description:'مثل Calendar، اینجا هم دو مسیر داریم. JMAP Contacts (JSContact) در Stalwart ممکن است کامل باشد یا نه. تصمیم باید پس از تست واقعی گرفته شود.',
+    subtasks:[
+      'بررسی پشتیبانی JMAP Contacts در Stalwart',
+      'اگر JMAP کامل نبود، بررسی CardDAV',
+      'دریافت لیست Contacts با pagination',
+      'ساخت Contact جدید',
+      'ویرایش Contact',
+      'حذف Contact',
+      'پیاده‌سازی Search (نام، ایمیل، تلفن)',
+      'پیاده‌سازی گروه‌ها / Address Books',
+      'پیاده‌سازی Import/Export (vCard)',
+      'تصمیم نهایی: JMAP یا CardDAV',
+      'تست کامل'
+    ],
+    docs:[
+      {t:'JMAP Documentation', u:'https://stalw.art/docs/jmap/'},
+      {t:'WebDAV / CalDAV / CardDAV', u:'https://stalw.art/docs/http/webdav/'}
+    ],
+    questions:[
+      'JSContact یا vCard؟ کدام در Stalwart پشتیبانی می‌شود؟',
+      'چند Address Book می‌توانیم داشته باشیم؟',
+      'آیا Sync با موبایل (CardDAV) نیاز است؟'
+    ],
+    tips:[
+      'اگر بعداً می‌خواهیم با موبایل Sync کنیم، CardDAV انتخاب بهتری است.',
+      'برای سرعت، IndexedDB برای Cache محلی مخاطبین مفید است.',
+      'vCard parser و serializer معتبر انتخاب کن (vcards-js).'
+    ],
+    output:'مشخص شدن API/Protocol نهایی Contacts + پیاده‌سازی تست‌شده.',
+    dependsOn:['AUTH-01']
+  },
+  {
+    id:'FILE-01', num:'۶', title:'Files', titleFa:'فایل‌ها',
+    color:'#a06bff', owner:'نفر ۲ — Collaboration',
+    goal:'ساخت File Manager کامل روی WebDAV که به Storage واقعی Stalwart متصل است.',
+    description:'WebDAV تنها راه دسترسی به File Storage در Stalwart است. تمام عملیات فایل (Upload, Download, Move, Rename, Delete) از طریق متدهای استاندارد WebDAV انجام می‌شود.',
+    subtasks:[
+      'مطالعهٔ کامل WebDAV methods (PROPFIND, GET, PUT, DELETE, MKCOL, MOVE, COPY)',
+      'اتصال React به WebDAV endpoint',
+      'دریافت لیست فایل‌ها و پوشه‌ها با PROPFIND',
+      'نمایش ساختار پوشه (Tree / Grid)',
+      'ساخت پوشهٔ جدید (MKCOL)',
+      'آپلود فایل (PUT) با پشتیبانی از فایل‌های بزرگ',
+      'دانلود فایل (GET) با streaming',
+      'تغییر نام و جابه‌جایی (MOVE)',
+      'کپی (COPY)',
+      'حذف (DELETE)',
+      'بررسی Permissionها (خواندن/نوشتن/اجرا)',
+      'بررسی محدودیت حجم و Quota',
+      'پیاده‌سازی Preview (تصویر، PDF)',
+      'تست کامل روی Storage واقعی'
+    ],
+    docs:[
+      {t:'WebDAV Documentation', u:'https://stalw.art/docs/http/webdav/'}
+    ],
+    questions:[
+      'WebDAV در Stalwart از Range Request پشتیبانی می‌کند؟ (برای فایل‌های بزرگ)',
+      'Quota چطور چک می‌شود؟',
+      'Permissions در سطح فایل یا پوشه است؟',
+      'آیا Locking (LOCK/UNLOCK) پشتیبانی می‌شود؟'
+    ],
+    tips:[
+      'PROPFIND با Depth:1 برای هر پوشه یک درخواست است — برای پوشه‌های بزرگ ممکن است کند شود.',
+      'برای Upload فایل بزرگ از chunked upload استفاده کن.',
+      'برای Preview تصویر، می‌توانی از Object URL استفاده کنی تا حافظه مصرف نشود.'
+    ],
+    output:'File Manager کامل متصل به Storage واقعی Stalwart.',
+    dependsOn:['AUTH-01']
+  },
+  {
+    id:'REG-01', num:'۷', title:'Registration', titleFa:'ثبت‌نام',
+    color:'#2dd4a7', owner:'نفر ۳ — Platform',
+    goal:'ساخت سیستم Registration بدون افزودن Backend غیرضروری — فقط با قابلیت‌های خود Stalwart.',
+    description:'سوال کلیدی: آیا Stalwart اجازهٔ ساخت Account بدون Admin می‌دهد؟ اگر نه، باید حداقل یک سرویس کوچک بسازیم. هدف این Task پاسخ دقیق به این سوال است.',
+    subtasks:[
+      'بررسی امکان ساخت Account بدون Admin از طریق API',
+      'بررسی Self-Service Registration در Stalwart',
+      'بررسی سیاست Password (طول، پیچیدگی)',
+      'بررسی Username availability endpoint',
+      'بررسی ساخت خودکار Mailbox در هنگام Registration',
+      'بررسی Rate Limit برای جلوگیری از سوءاستفاده',
+      'بررسی ALTCHA یا CAPTCHA پشتیبانی‌شده',
+      'تصمیم نهایی: کاملاً با Stalwart یا نیاز به سرویس کوچک',
+      'اگر سرویس لازم است، حداقل مشخصات آن را مستند کن',
+      'تست Flow کامل Registration'
+    ],
+    docs:[
+      {t:'Management Overview', u:'https://stalw.art/docs/management/'},
+      {t:'Authentication', u:'https://stalw.art/docs/auth/'},
+      {t:'API Reference', u:'https://stalw.art/docs/ref/'}
+    ],
+    questions:[
+      'آیا Registration بدون Admin Token ممکن است؟',
+      'اگر نه، آیا می‌توان یک API Key محدود ساخت که فقط User بسازد؟',
+      'ALTCHA در Stalwart فعال است یا باید خودمان اضافه کنیم؟',
+      'آیا می‌توان Registration را به Domain خاصی محدود کرد؟'
+    ],
+    tips:[
+      'اگر ناچار به ساخت سرویس کوچک شدی، آن را حتماً Stateless نگه دار و فقط از Management API خود Stalwart استفاده کن.',
+      'Rate Limit در سطح IP الزامی است، حتی اگر Stalwart نداشته باشد.',
+      'برای Username availability، از یک endpoint سبک استفاده کن نه Query سنگین.'
+    ],
+    output:'Flow نهایی Registration + تصمیم مستند در مورد نیاز یا عدم نیاز به سرویس کوچک.',
+    dependsOn:['USER-01']
+  },
+  {
+    id:'ADMIN-01', num:'۸', title:'Admin Panel', titleFa:'پنل مدیریت',
+    color:'#2dd4a7', owner:'نفر ۳ — Platform',
+    goal:'ساخت پنل مدیریت کامل روی APIهای رسمی Stalwart بدون Backend اضافی.',
+    description:'Stalwart خودش WebUI دارد، اما ما می‌خواهیم یک Admin Panel سفارشی داخل اپ React خودمان داشته باشیم. تمام عملیات از طریق Management API انجام می‌شود.',
+    subtasks:[
+      'بررسی ساختار WebUI خود Stalwart برای الهام گرفتن',
+      'ساخت صفحهٔ User Management (List, Create, Edit, Delete)',
+      'ساخت صفحهٔ Mailbox Management',
+      'ساخت صفحهٔ Domain Management',
+      'ساخت صفحهٔ Permission Management',
+      'نمایش وضعیت سیستم (Health, Uptime, Connections)',
+      'نمایش Logها (Mail log, Auth log, Error log)',
+      'پیاده‌سازی Authorization (فقط Admin دسترسی داشته باشد)',
+      'تست کامل تمام عملیات'
+    ],
+    docs:[
+      {t:'Management Overview', u:'https://stalw.art/docs/management/'},
+      {t:'Management Object Reference', u:'https://stalw.art/docs/ref/'},
+      {t:'Stalwart WebUI', u:'https://stalw.art/docs/management/webui/'}
+    ],
+    questions:[
+      'آیا Role جداگانه برای Admin وجود دارد یا فقط Admin/User؟',
+      'چطور Admin Panel را از دسترس کاربران عادی خارج کنیم؟',
+      'Logها چطور دریافت می‌شوند؟ (API یا File؟)'
+    ],
+    tips:[
+      'حتماً از خود WebUI Stalwart بازدید کن — بهترین منبع الهام برای طراحی است.',
+      'برای Authorization، در React یک Guard بساز + در Stalwart Role چک کن (دفاع لایه‌ای).',
+      'لاگ‌ها را هرگز روی کلاینت ذخیره نکن — همیشه از API بخوان.'
+    ],
+    output:'لیست دقیق APIهای مورد نیاز + Admin Panel پیاده‌سازی و تست‌شده.',
+    dependsOn:['AUTH-01','USER-01']
+  },
+  {
+    id:'DOMAIN-01', num:'۹', title:'Domains', titleFa:'دامنه‌ها',
+    color:'#2dd4a7', owner:'نفر ۳ — Platform',
+    goal:'مدیریت کامل Domainهای Mail شامل DKIM، Verification و Alias.',
+    description:'دامنه‌ها ریشهٔ Mail Server هستند. بدون Domain معتبر و DKIM امضا، ایمیل‌ها Spam می‌شوند. این Task حساس و کلیدی است.',
+    subtasks:[
+      'بررسی ساختار Domain در Management Object Model',
+      'ساخت Domain جدید',
+      'دریافت لیست Domainها',
+      'ویرایش تنظیمات Domain',
+      'حذف Domain (با هشدار)',
+      'پیاده‌سازی DKIM Key Generation',
+      'پیاده‌سازی DKIM Signing',
+      'مشاهدهٔ DNS Recordهای لازم (SPF، DKIM، DMARC)',
+      'پیاده‌سازی Verification وضعیت Domain',
+      'پیاده‌سازی Alias (گیرنده‌های چندگانه)',
+      'پیاده‌سازی Catch-all',
+      'تست ارسال/دریافت Mail با Domain واقعی'
+    ],
+    docs:[
+      {t:'Management Object Reference', u:'https://stalw.art/docs/ref/'},
+      {t:'Management Overview', u:'https://stalw.art/docs/management/'}
+    ],
+    questions:[
+      'DKIM Key چطور تولید و ذخیره می‌شود؟',
+      'آیا Stalwart SPF/DMARC را هم بررسی می‌کند یا فقط DKIM؟',
+      'Verification چطور انجام می‌شود؟ (DNS lookup؟)',
+      'آیا Alias در سطح Domain است یا Account؟'
+    ],
+    tips:[
+      'برای هر Domain، همیشه DKIM را فعال کن — بدون آن ایمیل‌ها به Spam می‌روند.',
+      'SPF و DMARC در DNS تنظیم می‌شوند، نه در Stalwart. مستندات DNS را هم بنویس.',
+      'Verification ممکن است زمان‌بر باشد (DNS Propagation) — UI را طوری بساز که وضعیت را polling کند.'
+    ],
+    output:'روش کامل و مستند مدیریت Domain + DKIM + Verification + Alias.',
+    dependsOn:['USER-01']
+  },
+  {
+    id:'INFRA-01', num:'۱۰', title:'Infrastructure', titleFa:'زیرساخت',
+    color:'#2dd4a7', owner:'نفر ۳ — Platform',
+    goal:'آماده‌سازی Stalwart برای استفادهٔ واقعی Production شامل HTTPS، Storage، Backup و Monitoring.',
+    description:'تمام Taskهای قبلی روی یک Stalwart آماده اجرا می‌شوند. این Task زیرساخت را برای همه آماده می‌کند و پیش‌نیاز شروع کار تیم است.',
+    subtasks:[
+      'راه‌اندازی HTTP Listener روی پورت مناسب',
+      'راه‌اندازی HTTPS با گواهی معتبر (Let\'s Encrypt)',
+      'تنظیم Domain و DNS رکوردها (A, MX, SPF, DKIM, DMARC)',
+      'بررسی و انتخاب Storage Backend (RocksDB، PostgreSQL، S3)',
+      'تنظیم Authentication Methodهای مجاز',
+      'تنظیم Permissionها و Roleها',
+      'بررسی نیاز به Reverse Proxy (Nginx/Caddy) و تصمیم‌گیری',
+      'راه‌اندازی Backup خودکار (DB + Blob)',
+      'راه‌اندازی Monitoring (Uptime، Connection Count، Queue)',
+      'راه‌اندازی Logging متمرکز',
+      'تنظیم Firewall و Rate Limiting',
+      'تنظیم CORS برای SPA',
+      'تست کامل End-to-End'
+    ],
+    docs:[
+      {t:'HTTP Service', u:'https://stalw.art/docs/http/'},
+      {t:'Authentication', u:'https://stalw.art/docs/auth/'}
+    ],
+    questions:[
+      'آیا Reverse Proxy لازم است یا Stalwart مستقیم HTTPS می‌دهد؟',
+      'Storage Backend برای مقیاس ما چیست؟',
+      'Backup Strategy چطور است؟ (Snapshot, Replication, Dump)',
+      'آیا Stalwart خودش Rate Limiting دارد یا باید در Proxy؟'
+    ],
+    tips:[
+      'قبل از هر چیز، DNS را درست تنظیم کن — بدون آن هیچ چیز کار نمی‌کند.',
+      'Backup را از روز اول راه‌اندازی کن — نه بعد از بروز مشکل.',
+      'Reverse Proxy اختیاری است، اما برای CORS، TLS termination و Rate Limiting خیلی کمک می‌کند.',
+      'این Task پیش‌نیاز همهٔ Taskهای دیگر است — زودتر تمامش کن.'
+    ],
+    output:'یک Stalwart کاملاً آمادهٔ Production برای اتصال Frontend.',
+    dependsOn:[]
+  }
+];
+
+const TEAM = [
+  { name:'نفر ۱', role:'Core / Mail', icon:'🛠️', color:'#5b9dff', tasks:['AUTH-01','MAIL-01','USER-01'] },
+  { name:'نفر ۲', role:'Collaboration', icon:'🧩', color:'#a06bff', tasks:['CAL-01','CONTACT-01','FILE-01'] },
+  { name:'نفر ۳', role:'Platform', icon:'⚙️', color:'#2dd4a7', tasks:['REG-01','ADMIN-01','DOMAIN-01','INFRA-01'] }
+];
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════ */
+
+const STORAGE_KEY = 'stalwart-suite-progress-v1';
+let progress = loadProgress();
+let currentView = { type:'dashboard' };
+let currentFilter = 'all';
+let searchQuery = '';
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveProgress(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  updateGlobalProgress();
+  updateNavProgress();
+}
+function isDone(taskId, idx){
+  return !!progress[`${taskId}:${idx}`];
+}
+function toggleSubtask(taskId, idx){
+  const key = `${taskId}:${idx}`;
+  if(progress[key]) delete progress[key];
+  else progress[key] = true;
+  saveProgress();
+  render();
+}
+function taskProgress(task){
+  const total = task.subtasks.length;
+  const done = task.subtasks.filter((_,i)=>isDone(task.id,i)).length;
+  return { done, total, pct: total ? Math.round(done/total*100) : 0 };
+}
+function globalProgress(){
+  let done=0, total=0;
+  TASKS.forEach(t=>{
+    const p = taskProgress(t);
+    done += p.done; total += p.total;
+  });
+  return { done, total, pct: total ? Math.round(done/total*100) : 0 };
+}
+function toFa(n){ return String(n).replace(/\d/g, d=>'۰۱۲۳۴۵۶۷۸۹'[d]); }
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════ */
+
+const root = document.getElementById('view-root');
+const navTasks = document.getElementById('nav-tasks');
+
+function render(){
+  renderNav();
+  if(currentView.type === 'dashboard') renderDashboard();
+  else if(currentView.type === 'task') renderTask(currentView.id);
+  else if(currentView.type === 'architecture') renderArchitecture();
+  else if(currentView.type === 'workflow') renderWorkflow();
+  else if(currentView.type === 'team') renderTeam();
+  updateGlobalProgress();
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function renderNav(){
+  navTasks.innerHTML = TASKS.map(t=>{
+    const p = taskProgress(t);
+    const done = p.pct === 100;
+    const active = currentView.type==='task' && currentView.id===t.id;
+    return `
+      <div class="nav-item ${active?'active':''} ${done?'done':''}" data-task="${t.id}" style="--tc:${t.color}">
+        <span class="dot"></span>
+        <span class="nav-label">${t.titleFa}</span>
+        <span class="nav-progress">${toFa(p.done)}/${toFa(p.total)}</span>
+      </div>
+    `;
+  }).join('');
+
+  navTasks.querySelectorAll('.nav-item').forEach(el=>{
+    el.onclick = ()=>{ currentView = {type:'task', id: el.dataset.task}; render(); };
+  });
+}
+
+function updateNavProgress(){
+  renderNav();
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+    el.classList.toggle('active', currentView.type === el.dataset.view);
+  });
+}
+
+function updateGlobalProgress(){
+  const g = globalProgress();
+  document.getElementById('global-progress-bar').style.width = g.pct + '%';
+  document.getElementById('global-progress-label').textContent = toFa(g.pct) + '٪';
+}
+
+/* ───────── DASHBOARD ───────── */
+
+function renderDashboard(){
+  const g = globalProgress();
+  const doneTasks = TASKS.filter(t=>taskProgress(t).pct===100).length;
+
+  const filtered = TASKS.filter(t=>{
+    if(currentFilter === 'all') return true;
+    if(currentFilter === 'todo') return taskProgress(t).pct < 100;
+    if(currentFilter === 'done') return taskProgress(t).pct === 100;
+    const owner = TEAM.find(m=>m.tasks.includes(t.id));
+    return owner && owner.name === currentFilter;
+  }).filter(t=>{
+    if(!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return t.title.toLowerCase().includes(q)
+        || t.titleFa.includes(q)
+        || t.id.toLowerCase().includes(q)
+        || t.goal.toLowerCase().includes(q);
+  });
+
+  root.innerHTML = `
+    <div class="view">
+      <div class="hero">
+        <div class="hero-badge">✦ نقشه‌راه کامل پروژه</div>
+        <h2>Stalwart Suite</h2>
+        <p>پلتفرم Mail · Calendar · Contacts · Files روی Stalwart — با Frontend در React SPA و بدون Backend اضافی. روی هر Task کلیک کن تا جزئیات کاملش باز شود.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat" style="--sc:#5b9dff">
+          <div class="num">${toFa(TASKS.length)}</div>
+          <div class="lbl">Task اصلی</div>
+        </div>
+        <div class="stat" style="--sc:#2dd4a7">
+          <div class="num">${toFa(doneTasks)}</div>
+          <div class="lbl">Task تکمیل‌شده</div>
+        </div>
+        <div class="stat" style="--sc:#a06bff">
+          <div class="num">${toFa(g.done)}/${toFa(g.total)}</div>
+          <div class="lbl">زیرکار انجام‌شده</div>
+        </div>
+        <div class="stat" style="--sc:#ff9d4d">
+          <div class="num">${toFa(g.pct)}٪</div>
+          <div class="lbl">پیشرفت کلی</div>
+        </div>
+      </div>
+
+      <div class="kpi-strip">
+        <div class="kpi-item">👥 تیم: <b>${toFa(TEAM.length)} نفر</b></div>
+        <div class="kpi-item">🔗 پروتکل‌ها: <b>JMAP · WebDAV · HTTP API</b></div>
+        <div class="kpi-item">🎯 قانون طلایی: <b>Docs → Test → Decide → Implement</b></div>
+      </div>
+
+      <input class="search-box" type="text" id="search-input" placeholder="🔍 جست‌وجو در Taskها، ID، هدف..." value="${searchQuery}">
+
+      <div class="filter-row">
+        <button class="filter-btn ${currentFilter==='all'?'active':''}" data-f="all">همه</button>
+        <button class="filter-btn ${currentFilter==='todo'?'active':''}" data-f="todo">در جریان</button>
+        <button class="filter-btn ${currentFilter==='done'?'active':''}" data-f="done">تکمیل‌شده</button>
+        ${TEAM.map(m=>`<button class="filter-btn ${currentFilter===m.name?'active':''}" data-f="${m.name}">${m.name}</button>`).join('')}
+      </div>
+
+      <div class="cards-grid">
+        ${filtered.length ? filtered.map(t=>renderCard(t)).join('') : `<div class="empty" style="grid-column:1/-1"><div class="big">🔎</div>چیزی پیدا نشد.</div>`}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('search-input').oninput = (e)=>{
+    searchQuery = e.target.value;
+    const pos = e.target.selectionStart;
+    renderDashboard();
+    const inp = document.getElementById('search-input');
+    inp.focus(); inp.setSelectionRange(pos,pos);
+  };
+  root.querySelectorAll('.filter-btn').forEach(b=>{
+    b.onclick = ()=>{ currentFilter = b.dataset.f; renderDashboard(); };
+  });
+  root.querySelectorAll('.card').forEach(c=>{
+    c.onclick = ()=>{ currentView = {type:'task', id: c.dataset.id}; render(); };
+  });
+}
+
+function renderCard(t){
+  const p = taskProgress(t);
+  const owner = TEAM.find(m=>m.tasks.includes(t.id));
+  return `
+    <div class="card" data-id="${t.id}" style="--tc:${t.color}">
+      <div class="card-head">
+        <div class="card-num">${t.num}</div>
+        <div style="flex:1">
+          <h3>${t.titleFa}</h3>
+          <span class="card-id">${t.id} · ${t.title}</span>
+        </div>
+      </div>
+      <p class="card-goal">${t.goal}</p>
+      <div class="card-foot">
+        <span class="prog-num">${toFa(p.pct)}٪</span>
+        <div class="mini-bar"><div style="width:${p.pct}%"></div></div>
+        <span>${owner?owner.name:''}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ───────── TASK DETAIL ───────── */
+
+function renderTask(id){
+  const t = TASKS.find(x=>x.id===id);
+  if(!t){ currentView={type:'dashboard'}; render(); return; }
+  const p = taskProgress(t);
+
+  root.innerHTML = `
+    <div class="view" style="--tc:${t.color}">
+      <div class="view-head">
+        <button class="back-btn" onclick="goBack()">→ بازگشت</button>
+        <div class="task-title-block">
+          <h2><span class="tnum">${t.num}</span>${t.titleFa}</h2>
+          <div class="meta">
+            <span class="meta-chip id">${t.id}</span>
+            <span class="meta-chip">${t.title}</span>
+            <span class="meta-chip">👤 ${t.owner}</span>
+            <span class="meta-chip">📊 ${toFa(p.done)}/${toFa(p.total)} — ${toFa(p.pct)}٪</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-goal-box"><p>${t.goal}</p></div>
+
+      <div class="detail-section">
+        <h3><span class="ic">📖</span>توضیح کامل</h3>
+        <div style="padding:18px 20px;background:var(--card);border:1px solid var(--border);border-radius:12px;color:#c5cfe0;line-height:1.9">${t.description}</div>
+      </div>
+
+      <div class="detail-section">
+        <h3><span class="ic">✅</span>زیرکارها <span class="count">${toFa(p.done)} / ${toFa(p.total)}</span></h3>
+        <div class="subtasks">
+          ${t.subtasks.map((s,i)=>{
+            const d = isDone(t.id,i);
+            return `
+              <div class="subtask ${d?'checked':''}" data-idx="${i}">
+                <div class="checkbox">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,8 7,12 13,4"/></svg>
+                </div>
+                <div class="st-text">${s}</div>
+                <div class="st-num">${toFa(i+1)}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      ${t.questions.length ? `
+      <div class="detail-section">
+        <h3><span class="ic">❓</span>سوالات کلیدی که باید پاسخ داده شوند</h3>
+        <div class="questions">
+          ${t.questions.map(q=>`<div class="question">${q}</div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      ${t.tips.length ? `
+      <div class="detail-section">
+        <h3><span class="ic">💡</span>نکات و هشدارهای مهم</h3>
+        <div class="tips">
+          ${t.tips.map(x=>`<div class="tip">${x}</div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <div class="detail-section">
+        <h3><span class="ic">📚</span>مستندات رسمی Stalwart</h3>
+        <div class="docs-grid">
+          ${t.docs.map(d=>`
+            <a class="doc-link" href="${d.u}" target="_blank" rel="noopener">
+              <span>${d.t}</span><span class="arrow">↗</span>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+
+      ${t.dependsOn.length ? `
+      <div class="detail-section">
+        <h3><span class="ic">🔗</span>وابستگی‌ها</h3>
+        <div class="deps">
+          ${t.dependsOn.map(d=>`<span class="dep" data-dep="${d}">${d}</span>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <div class="detail-section">
+        <h3><span class="ic">🎯</span>خروجی نهایی</h3>
+        <div class="output-box">
+          <div class="ok">✓</div>
+          <div class="body">
+            <div class="lbl">DELIVERABLE</div>
+            <p>${t.output}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  root.querySelectorAll('.subtask').forEach(el=>{
+    el.onclick = ()=>toggleSubtask(t.id, +el.dataset.idx);
+  });
+  root.querySelectorAll('.dep').forEach(el=>{
+    el.onclick = ()=>{ currentView = {type:'task', id: el.dataset.dep}; render(); };
+  });
+}
+
+/* ───────── ARCHITECTURE ───────── */
+
+function renderArchitecture(){
+  root.innerHTML = `
+    <div class="view">
+      <div class="view-head">
+        <button class="back-btn" onclick="goBack()">→ بازگشت</button>
+        <div class="task-title-block">
+          <h2>🧭 معماری کلی</h2>
+          <div class="meta">
+            <span class="meta-chip">React SPA ⇄ Stalwart</span>
+            <span class="meta-chip">JMAP · WebDAV · HTTP API</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="diagram-wrap">
+        <div class="mermaid">
+flowchart TD
+    U([👤 USER]):::user
+    R[⚛️ React SPA]:::react
+    S{{🛡️ STALWART}}:::core
+
+    U --> R
+    R -->|HTTPS / HTTP| S
+
+    S --> AUTH[🔐 Authentication]:::auth
+    S --> AZ[✅ Authorization]:::auth
+
+    S --> JMAP[JMAP]:::jmap
+    JMAP --> M[✉️ Mail]:::svc
+    JMAP --> C[📅 Calendar]:::svc
+    JMAP --> K[👥 Contacts]:::svc
+
+    S --> MGMT[⚙️ Management]:::mgmt
+    MGMT --> US[Users]:::svc
+    MGMT --> DM[Domains]:::svc
+    MGMT --> AD[Admin]:::svc
+
+    S --> DAV[WebDAV]:::dav
+    DAV --> F[📁 Files]:::svc
+
+    classDef user fill:#1a2338,stroke:#7c5cff,color:#c5b3ff,stroke-width:2px
+    classDef react fill:#0f2440,stroke:#5b9dff,color:#a8ccff,stroke-width:2px
+    classDef core fill:#2a1a3d,stroke:#a06bff,color:#e0ccff,stroke-width:3px
+    classDef auth fill:#1a2338,stroke:#2dd4a7,color:#a8e6d4,stroke-width:1.5px
+    classDef jmap fill:#2d2417,stroke:#ff9d4d,color:#ffd8a8,stroke-width:2px
+    classDef mgmt fill:#1a2d24,stroke:#2dd4a7,color:#a8e6d4,stroke-width:2px
+    classDef dav fill:#2d1724,stroke:#ff5c8a,color:#ffb8cc,stroke-width:2px
+    classDef svc fill:#141b2e,stroke:#243049,color:#c5cfe0,stroke-width:1.5px
+        </div>
+      </div>
+
+      <div style="margin-top:30px;padding:22px 24px;background:linear-gradient(135deg,rgba(255,157,77,.08),transparent);border:1px solid rgba(255,157,77,.3);border-radius:14px;border-right:3px solid #ff9d4d">
+        <div style="font-weight:700;color:#ff9d4d;margin-bottom:8px">⚠️ نکتهٔ کلیدی Stalwart</div>
+        <p style="color:#e0d5c5;font-size:.95rem">عملیات مدیریتی و Configuration از طریق <b style="color:#ff9d4d">JMAP مدیریتی</b> انجام می‌شوند. WebUI، CLI و HTTP API همگی روی همین مدل کار می‌کنند. پس قبل از ساخت هر API اختصاصی، اول همان قابلیت Stalwart را بررسی کن.</p>
+      </div>
+    </div>
+  `;
+  mermaidRun();
+}
+
+/* ───────── WORKFLOW ───────── */
+
+function renderWorkflow(){
+  root.innerHTML = `
+    <div class="view">
+      <div class="view-head">
+        <button class="back-btn" onclick="goBack()">→ بازگشت</button>
+        <div class="task-title-block">
+          <h2>🔄 چرخهٔ انجام هر Task</h2>
+          <div class="meta"><span class="meta-chip">قانون طلایی تیم</span></div>
+        </div>
+      </div>
+
+      <div class="diagram-wrap">
+        <div class="mermaid">
+flowchart LR
+    A([📖 Read Stalwart Docs]):::s1 --> B([🧪 Test on Stalwart]):::s2
+    B --> C([🧭 Decide API/Protocol]):::s3
+    C --> D([💻 Implement]):::s4
+    D --> E([✅ Test]):::s5
+    E --> F([🏁 Mark as Done]):::done
+
+    classDef s1 fill:#0f2440,stroke:#5b9dff,color:#a8ccff,stroke-width:2px
+    classDef s2 fill:#2d2417,stroke:#ff9d4d,color:#ffd8a8,stroke-width:2px
+    classDef s3 fill:#2a1a3d,stroke:#a06bff,color:#e0ccff,stroke-width:2px
+    classDef s4 fill:#0f2440,stroke:#5b9dff,color:#a8ccff,stroke-width:2px
+    classDef s5 fill:#2d2417,stroke:#ff9d4d,color:#ffd8a8,stroke-width:2px
+    classDef done fill:#1a2d24,stroke:#2dd4a7,color:#a8e6d4,stroke-width:3px
+        </div>
+      </div>
+
+      <div style="margin-top:30px;display:grid;gap:14px">
+        <div style="padding:18px 22px;background:var(--card);border:1px solid var(--border);border-radius:12px;border-right:3px solid #5b9dff">
+          <b style="color:#5b9dff">۱. Read Stalwart Docs</b>
+          <p style="color:#c5cfe0;font-size:.92rem;margin-top:6px">قبل از هر خط کد، مستندات رسمی همان بخش را کامل بخوان. حداقل دو منبع مرتبط.</p>
+        </div>
+        <div style="padding:18px 22px;background:var(--card);border:1px solid var(--border);border-radius:12px;border-right:3px solid #ff9d4d">
+          <b style="color:#ff9d4d">۲. Test on Stalwart</b>
+          <p style="color:#c5cfe0;font-size:.92rem;margin-top:6px">با curl/Postman روی Stalwart واقعی تست کن. فرض نکن که کار می‌کند.</p>
+        </div>
+        <div style="padding:18px 22px;background:var(--card);border:1px solid var(--border);border-radius:12px;border-right:3px solid #a06bff">
+          <b style="color:#a06bff">۳. Decide API / Protocol</b>
+          <p style="color:#c5cfe0;font-size:.92rem;margin-top:6px">پس از تست، تصمیم بگیر: JMAP یا WebDAV یا HTTP API؟ کدام endpoint؟ چرا؟</p>
+        </div>
+        <div style="padding:18px 22px;background:var(--card);border:1px solid var(--border);border-radius:12px;border-right:3px solid #5b9dff">
+          <b style="color:#5b9dff">۴. Implement</b>
+          <p style="color:#c5cfe0;font-size:.92rem;margin-top:6px">حالا کد بزن. با Interceptor و Error Handling مناسب.</p>
+        </div>
+        <div style="padding:18px 22px;background:var(--card);border:1px solid var(--border);border-radius:12px;border-right:3px solid #ff9d4d">
+          <b style="color:#ff9d4d">۵. Test</b>
+          <p style="color:#c5cfe0;font-size:.92rem;margin-top:6px">هم Unit test و هم Manual test روی Stalwart واقعی. Edge cases را حتماً چک کن.</p>
+        </div>
+        <div style="padding:18px 22px;background:linear-gradient(135deg,rgba(45,212,167,.1),transparent);border:1px solid rgba(45,212,167,.35);border-radius:12px;border-right:3px solid #2dd4a7">
+          <b style="color:#2dd4a7">۶. Mark as Done</b>
+          <p style="color:#b8e6d6;font-size:.92rem;margin-top:6px">تیک نهایی + مستندسازی. اگر چیزی یاد گرفتی که برای نفرات دیگر مفید است، بنویس.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:30px;padding:24px;background:linear-gradient(135deg,rgba(255,77,109,.08),transparent);border:1px solid rgba(255,77,109,.3);border-radius:14px;border-right:3px solid #ff4d6d">
+        <div style="font-weight:800;color:#ff4d6d;margin-bottom:8px;font-size:1.05rem">⛔ قانون سخت</div>
+        <p style="color:#e8dfc5">اگر در مرحلهٔ ۱ یا ۲ چیزی مشخص نشد، <b style="color:#ff4d6d">هرگز مستقیم کدنویسی نکن</b>. اول Research کن، جواب را پیدا کن، سپس تصمیم بگیر.</p>
+      </div>
+    </div>
+  `;
+  mermaidRun();
+}
+
+/* ───────── TEAM ───────── */
+
+function renderTeam(){
+  root.innerHTML = `
+    <div class="view">
+      <div class="view-head">
+        <button class="back-btn" onclick="goBack()">→ بازگشت</button>
+        <div class="task-title-block">
+          <h2>👥 تقسیم کار تیمی</h2>
+          <div class="meta"><span class="meta-chip">۳ نفر · بدون تداخل</span></div>
+        </div>
+      </div>
+
+      <div class="team-grid">
+        ${TEAM.map(m=>`
+          <div class="member" style="--mc:${m.color}">
+            <div class="avatar">${m.icon}</div>
+            <h3>${m.name}</h3>
+            <div class="role">${m.role}</div>
+            <div class="chips">
+              ${m.tasks.map(id=>{
+                const t = TASKS.find(x=>x.id===id);
+                const p = taskProgress(t);
+                return `<span class="chip" data-task="${id}">${id} · ${toFa(p.pct)}٪</span>`;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="margin-top:30px;padding:22px 24px;background:var(--card);border:1px solid var(--border);border-radius:14px">
+        <p style="color:#c5cfe0;font-size:.93rem">
+          <b style="color:#fff">نکته:</b> این تقسیم‌بندی ثابت نیست. هدف فقط این است که هر نفر یک بخش مشخص داشته باشد و کارها روی هم نیفتد. نفر ۱ و ۲ به‌شدت به <b style="color:#5b9dff">AUTH-01</b> وابسته‌اند، پس نفر ۳ باید <b style="color:#2dd4a7">INFRA-01</b> را زودتر تمام کند.
+        </p>
+      </div>
+    </div>
+  `;
+  root.querySelectorAll('.chip').forEach(el=>{
+    el.onclick = ()=>{ currentView = {type:'task', id: el.dataset.task}; render(); };
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════════════════ */
+
+function goBack(){
+  if(currentView.type === 'task') currentView = {type:'dashboard'};
+  else currentView = {type:'dashboard'};
+  render();
+}
+
+document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+  el.onclick = ()=>{ currentView = {type: el.dataset.view}; render(); };
+});
+
+/* ═══ MERMAID ═══ */
+function mermaidRun(){
+  if(window.mermaid){
+    try{
+      mermaid.run({ querySelector:'.mermaid' });
+    }catch(e){ console.warn('mermaid error', e); }
+  }
+}
+mermaid.initialize({
+  startOnLoad:false,
+  theme:'base',
+  securityLevel:'loose',
+  themeVariables:{
+    fontFamily:'Vazirmatn, sans-serif',
+    fontSize:'14px',
+    primaryColor:'#141b2e',
+    primaryTextColor:'#e6ecf5',
+    primaryBorderColor:'#243049',
+    lineColor:'#5b9dff',
+    tertiaryColor:'#0f1524'
+  },
+  flowchart:{ curve:'basis', padding:20, nodeSpacing:40, rankSpacing:60 }
+});
+
+/* ═══ IMPORT / EXPORT ═══ */
+function exportProgress(){
+  const blob = new Blob([JSON.stringify({ version:1, progress, exportedAt:new Date().toISOString() }, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `stalwart-suite-progress-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('پیشرفت با موفقیت Export شد ✓');
+}
+function importProgress(){
+  document.getElementById('import-file').click();
+}
+document.getElementById('import-file').onchange = (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(data.progress && typeof data.progress === 'object'){
+        progress = data.progress;
+        saveProgress();
+        render();
+        toast('پیشرفت با موفقیت Import شد ✓');
+      } else { toast('فایل نامعتبر است ✗'); }
+    }catch(err){ toast('خطا در خواندن فایل ✗'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+function resetProgress(){
+  if(!confirm('مطمئنی می‌خواهی همهٔ پیشرفت را پاک کنی؟ این عمل قابل بازگشت نیست.')) return;
+  progress = {};
+  saveProgress();
+  render();
+  toast('همهٔ پیشرفت پاک شد');
+}
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 2400);
+}
+
+/* ═══ INIT ═══ */
+render();
+</script>
+</body>
+</html>
