@@ -334,7 +334,10 @@ function SignupCard({ text, domain, spotlight, cardRef }) {
       }
       setResult(payload);
     } catch (requestError) {
-      setError(requestError.message || text.errors.network);
+      // Browser network/CORS failures intentionally have no HTTP response.
+      // Give the operator a useful local-development hint instead of exposing
+      // the browser's unhelpful "Failed to fetch" message to an end user.
+      setError(requestError instanceof TypeError ? text.errors.network : (requestError.message || text.errors.network));
     } finally {
       setLoading(false);
     }

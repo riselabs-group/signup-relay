@@ -23,7 +23,9 @@ DATABASES={'default':{'ENGINE':'django.db.backends.sqlite3','NAME':BASE_DIR/'db.
 if os.getenv('DATABASE_URL'):
  db=urlparse(os.environ['DATABASE_URL']); DATABASES={'default':{'ENGINE':'django.db.backends.postgresql','NAME':(db.path or '/rise').lstrip('/'),'USER':db.username or os.getenv('POSTGRES_USER','rise'),'PASSWORD':db.password or os.getenv('POSTGRES_PASSWORD',''),'HOST':db.hostname or os.getenv('POSTGRES_HOST','localhost'),'PORT':str(db.port or os.getenv('POSTGRES_PORT','5432')),'CONN_MAX_AGE':60,'OPTIONS':{'sslmode':os.getenv('POSTGRES_SSLMODE','prefer')}}}
 LANGUAGE_CODE=os.getenv('LANGUAGE_CODE','fa-ir'); LANGUAGES=[('fa','فارسی'),('en','English')]; TIME_ZONE=os.getenv('TIME_ZONE','Asia/Tehran'); USE_I18N=True; USE_TZ=True; STATIC_URL='static/'
-CORS_ALLOWED_ORIGINS=os.getenv('CORS_ALLOWED_ORIGINS','http://localhost:5173').split(','); CSRF_TRUSTED_ORIGINS=CORS_ALLOWED_ORIGINS
+# Vite may be opened using either hostname during local development. Production
+# deployments must override this list with their exact HTTPS frontend origins.
+CORS_ALLOWED_ORIGINS=[origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS','http://localhost:5173,http://127.0.0.1:5173').split(',') if origin.strip()]; CSRF_TRUSTED_ORIGINS=CORS_ALLOWED_ORIGINS
 DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
 AUTH_PASSWORD_VALIDATORS=[{'NAME':'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},{'NAME':'django.contrib.auth.password_validation.MinimumLengthValidator','OPTIONS':{'min_length':12}},{'NAME':'django.contrib.auth.password_validation.CommonPasswordValidator'},{'NAME':'django.contrib.auth.password_validation.NumericPasswordValidator'}]
 if os.getenv('REDIS_URL'):
