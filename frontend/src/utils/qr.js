@@ -13,5 +13,5 @@ export function createQrMatrix(text) {
 
 export function generateQrSvgDataUri(text, size = 256) {
   const svg = createQrMatrix(text).getSvgString(size);
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }

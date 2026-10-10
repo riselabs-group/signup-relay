@@ -68,14 +68,90 @@ test('generateRandomString produces unique strings with alphanumeric charset', (
   assert.match(s1, /^[a-z0-9]+$/);
 });
 
-test('openDeltaChatUri safely no-ops when window is undefined', () => {
+test('openDeltaChatUri safely returns no-op cleanup when window is undefined', () => {
   // In Node environment, window is undefined by default
+  let cleanup;
   assert.doesNotThrow(() => {
-    openDeltaChatUri('dclogin:test@chatchi.org/?p=1', () => {});
+    cleanup = openDeltaChatUri('dclogin:test@chatchi.org/?p=1', () => {});
   });
+  assert.equal(typeof cleanup, 'function');
+  assert.doesNotThrow(() => cleanup());
 });
 
 test('openDeltaChatUri triggers fallback callback if app does not open before timeout', async () => {
+  let fallbackCalled = false;
+  let listeners = {};
+  const mockWindow = {
+    location: { href: '' },
+    addEventListener: (event, handler) => { listeners[event] = handler; },
+    removeEventListener: (event) => { delete listeners[event]; },
+  };
+  const mockDocument = {
+    hidden: false,
+    addEventListener: (event, handler) => { listeners[event] = handler; },
+    removeEventListener: (event) => { delete listeners[event]; },
+  };
+
+  globalThis.window = mockWindow;
+  globalThis.document = mockDocument;
+
+  try {
+    const cleanup = openDeltaChatUri('dclogin:test@chatchi.org/?p=123', () => {
+      fallbackCalled = true;
+    }, 50);
+    assert.equal(typeof cleanup, 'function');
+
+    assert.equal(mockWindow.location.href, 'dclogin:test@chatchi.org/?p=123');
+    assert.equal(fallbackCalled, false);
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    assert.equal(fallbackCalled, true);
+  } finally {
+    delete globalThis.window;
+    delete globalThis.document;
+  }
+});
+
+test('openDeltaChatUri cleanup handle cancels timeout and cleans listeners', async () => {
+  let fallbackCalled = false;
+  let listeners = {};
+  const mockWindow = {
+    location: { href: '' },
+    addEventListener: (event, handler) => { listeners[event] = handler; },
+    removeEventListener: (event) => { delete listeners[event]; },
+  };
+  const mockDocument = {
+    hidden: false,
+    addEventListener: (event, handler) => { listeners[event] = handler; },
+    removeEventListener: (event) => { delete listeners[event]; },
+  };
+
+  globalThis.window = mockWindow;
+  globalThis.document = mockDocument;
+
+  try {
+    const cleanup = openDeltaChatUri('dclogin:test@chatchi.org/?p=123', () => {
+      fallbackCalled = true;
+    }, 50);
+
+    assert.equal(typeof listeners.blur, 'function');
+    assert.equal(typeof listeners.visibilitychange, 'function');
+
+    // Caller unmounts and invokes cleanup before timeout
+    cleanup();
+
+    assert.equal(listeners.blur, undefined);
+    assert.equal(listeners.visibilitychange, undefined);
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    assert.equal(fallbackCalled, false);
+  } finally {
+    delete globalThis.window;
+    delete globalThis.document;
+  }
+});
+
+test('openDeltaChatUri handles visibilitychange transitions', async () => {
   let fallbackCalled = false;
   let listeners = {};
   const mockWindow = {
@@ -97,11 +173,16 @@ test('openDeltaChatUri triggers fallback callback if app does not open before ti
       fallbackCalled = true;
     }, 50);
 
-    assert.equal(mockWindow.location.href, 'dclogin:test@chatchi.org/?p=123');
-    assert.equal(fallbackCalled, false);
+    // Initial visibility event where document is not hidden yet
+    mockDocument.hidden = false;
+    if (listeners.visibilitychange) listeners.visibilitychange();
+
+    // Secondary visibility event where document becomes hidden (e.g. app opened)
+    mockDocument.hidden = true;
+    if (listeners.visibilitychange) listeners.visibilitychange();
 
     await new Promise((resolve) => setTimeout(resolve, 80));
-    assert.equal(fallbackCalled, true);
+    assert.equal(fallbackCalled, false);
   } finally {
     delete globalThis.window;
     delete globalThis.document;
@@ -149,6 +230,6 @@ test('qr utilities generate SVG representation and data URI', () => {
   assert.ok(svg.includes('height="200"'));
 
   const dataUri = generateQrSvgDataUri('dclogin:test@chatchi.org/?p=123', 200);
-  assert.ok(dataUri.startsWith('data:image/svg+xml;utf8,'));
+  assert.ok(dataUri.startsWith('data:image/svg+xml;charset=utf-8,'));
   assert.ok(dataUri.includes('%3Csvg'));
 });

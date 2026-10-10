@@ -53,7 +53,7 @@ export function buildDcloginUri({
 }
 
 export function openDeltaChatUri(dcloginUrl, onFallback, timeoutMs = 2000) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') return () => {};
 
   let opened = false;
   let timer = null;
@@ -76,7 +76,7 @@ export function openDeltaChatUri(dcloginUrl, onFallback, timeoutMs = 2000) {
   };
 
   window.addEventListener('blur', handleBlur, { once: true });
-  document.addEventListener('visibilitychange', handleVisibility, { once: true });
+  document.addEventListener('visibilitychange', handleVisibility);
 
   window.location.href = dcloginUrl;
 
@@ -86,4 +86,6 @@ export function openDeltaChatUri(dcloginUrl, onFallback, timeoutMs = 2000) {
       onFallback();
     }
   }, timeoutMs);
+
+  return cleanup;
 }
