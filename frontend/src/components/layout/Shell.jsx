@@ -14,7 +14,9 @@ export function Shell({ currentRoute, onNavigate, children }) {
     setTheme(next);
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('chatchi_theme', next);
+      try {
+        localStorage.setItem('chatchi_theme', next);
+      } catch (_) {}
     }
   };
 

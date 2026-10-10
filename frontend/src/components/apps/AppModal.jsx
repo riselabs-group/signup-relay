@@ -24,6 +24,9 @@ export function AppModal({ app, onClose }) {
           </button>
         </div>
       </div>
+      <form method="dialog" className="modal-backdrop">
+        <button onClick={onClose}>close</button>
+      </form>
     </dialog>
   );
 }

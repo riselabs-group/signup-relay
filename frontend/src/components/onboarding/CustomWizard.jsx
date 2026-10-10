@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '../../i18n/index.jsx';
 import { service } from '../../services/index.js';
+import { SERVICE_CONFIG } from '../../services/config.js';
 import { generateQrSvgDataUri } from '../../utils/qr.js';
 import { openDeltaChatUri } from '../../utils/dclogin.js';
 import { ManualInstructions } from './ManualInstructions.jsx';
@@ -70,7 +71,7 @@ export function CustomWizard() {
       <div className="flex-1 flex flex-col justify-center">
         {step === 1 && (
           <div className="form-control gap-2">
-            <label className="label text-xs font-medium">نام کاربری مورد نظر</label>
+            <label className="label text-xs font-medium">{t('wizard_username_label')}</label>
             <div className="join w-full">
               <input
                 type="text"
@@ -81,14 +82,14 @@ export function CustomWizard() {
                 dir="ltr"
                 required
               />
-              <span className="btn btn-sm btn-disabled join-item"><bdi dir="ltr">@chatchi.org</bdi></span>
+              <span className="btn btn-sm btn-disabled join-item"><bdi dir="ltr">@{SERVICE_CONFIG.DOMAIN}</bdi></span>
             </div>
           </div>
         )}
 
         {step === 2 && (
           <div className="form-control gap-2">
-            <label className="label text-xs font-medium">رمز عبور قوی</label>
+            <label className="label text-xs font-medium">{t('wizard_password_label')}</label>
             <input
               type="password"
               value={password}
@@ -99,7 +100,7 @@ export function CustomWizard() {
               required
             />
             <div className="card bg-base-300/40 p-2 text-xs rounded border border-base-300 flex items-center justify-between">
-              <span>تأیید امنیتی (Altcha PoW)</span>
+              <span>{t('wizard_altcha_label')}</span>
               <span className="badge badge-success badge-sm text-white">تأیید شد ✓</span>
             </div>
           </div>
@@ -107,7 +108,7 @@ export function CustomWizard() {
 
         {step === 3 && result && (
           <div className="text-center space-y-4 py-2">
-            <div className="badge badge-success text-white py-3 px-4 text-xs font-semibold">حساب با موفقیت ساخته شد!</div>
+            <div className="badge badge-success text-white py-3 px-4 text-xs font-semibold">{t('wizard_success_badge')}</div>
 
             {result.dclogin_link && (
               <div className="w-56 h-56 mx-auto bg-white p-3 rounded-xl border border-base-300 flex items-center justify-center shadow-inner">
@@ -170,7 +171,7 @@ export function CustomWizard() {
             }}
             className="btn btn-outline btn-sm w-full"
           >
-            ساخت حساب دیگر
+            {t('wizard_reset_btn')}
           </button>
         )}
       </div>

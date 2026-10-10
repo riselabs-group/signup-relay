@@ -228,6 +228,9 @@ test('qr utilities generate SVG representation and data URI', () => {
   assert.ok(svg.includes('<svg'));
   assert.ok(svg.includes('width="200"'));
   assert.ok(svg.includes('height="200"'));
+  assert.ok(svg.includes('<path fill="#ffffff"'), 'Must generate background path');
+  assert.ok(svg.includes('stroke="#000000"'), 'Must generate dark modules path');
+  assert.ok(!svg.includes('QR CODE'), 'Must not use placeholder text');
 
   const dataUri = generateQrSvgDataUri('dclogin:test@chatchi.org/?p=123', 200);
   assert.ok(dataUri.startsWith('data:image/svg+xml;charset=utf-8,'));

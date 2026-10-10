@@ -69,7 +69,7 @@ test('CustomWizard component enforces 3-step wizard, locked height, Altcha indic
   assert.match(content, /openDeltaChatUri/, 'Must provide openDeltaChatUri action on custom completion');
   assert.match(content, /ManualInstructions/, 'Must render ManualInstructions on custom completion');
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText on custom completion');
-  assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@chatchi\.org<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
+  assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@\{SERVICE_CONFIG\.DOMAIN\}<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{result\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
 });
 

@@ -7,12 +7,14 @@
     <title>Chatchi — DeltaChat Portal</title>
     <script>
       (function () {
-        const stored = localStorage.getItem('chatchi_theme');
-        const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'chatchi-dark'
-          : 'chatchi-light';
-        const theme = stored || preferred;
-        document.documentElement.setAttribute('data-theme', theme);
+        try {
+          const stored = localStorage.getItem('chatchi_theme');
+          const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'chatchi-dark'
+            : 'chatchi-light';
+          const theme = stored || preferred;
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (_) {}
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

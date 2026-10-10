@@ -1,12 +1,18 @@
-// Minimal self-contained QR matrix renderer (Pure client-side)
-// Wraps text into a clean high-contrast SVG representation
+import QRCode from 'qrcode';
 
+// Minimal in-memory vector QR generator (Pure client-side via 'qrcode')
+// Generates valid, high-contrast, scannable SVG QR code representation
 export function createQrMatrix(text) {
-  // ponytail: lightweight SVG placeholder matrix; wire to 'qrcode' library or direct canvas if full QR rendering needed
   return {
     text,
     getSvgString(size = 256) {
-      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${size}" height="${size}"><rect width="100" height="100" fill="#ffffff"/><text x="50" y="55" font-size="6" text-anchor="middle" fill="#000000">QR CODE</text></svg>`;
+      let svg = '';
+      try {
+        QRCode.toString(text, { type: 'svg', width: size, margin: 2 }, (err, str) => {
+          if (!err && str) svg = str;
+        });
+      } catch (_) {}
+      return svg;
     },
   };
 }

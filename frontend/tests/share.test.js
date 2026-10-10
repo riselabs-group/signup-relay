@@ -34,7 +34,7 @@ test('ShareCard component enforces in-memory vector QR, bdi isolation, and clipb
   assert.match(content, /generateQrSvgDataUri\(inviteUri,\s*160\)/, 'Must use in-memory vector QR generator with size 160');
   assert.ok(!content.includes('api.qrserver.com'), 'Must not use external third-party qrserver APIs');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{handle\}<\/bdi>/, 'Must wrap handle in <bdi dir="ltr"> for bidirectional isolation');
-  assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard.writeText with .catch');
+  assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)[\s\S]*?\.catch/, 'Must guard clipboard.writeText with .catch');
   assert.match(content, /navigator\.share/, 'Must check and trigger navigator.share API');
   assert.match(content, /width=["']160["']/, 'Must explicitly set width=160 on QR image for zero CLS');
   assert.match(content, /height=["']160["']/, 'Must explicitly set height=160 on QR image for zero CLS');

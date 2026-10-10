@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useI18n } from '../../i18n/index.jsx';
+import { SERVICE_CONFIG } from '../../services/config.js';
 import { generateRandomCredentials, buildDcloginUri, openDeltaChatUri } from '../../utils/dclogin.js';
 import { generateQrSvgDataUri } from '../../utils/qr.js';
 import { ManualInstructions } from './ManualInstructions.jsx';
@@ -16,12 +17,12 @@ export function InstantQrCard() {
     setLoading(true);
     setNotInstalled(false);
     setTimeout(() => {
-      const creds = generateRandomCredentials('chatchi.org');
+      const creds = generateRandomCredentials(SERVICE_CONFIG.DOMAIN);
       const uri = buildDcloginUri({
         email: creds.email,
         password: creds.password,
-        imapHost: 'mail.chatchi.org',
-        smtpHost: 'mail.chatchi.org',
+        imapHost: `mail.${SERVICE_CONFIG.DOMAIN}`,
+        smtpHost: `mail.${SERVICE_CONFIG.DOMAIN}`,
       });
       setAccount({ ...creds, dclogin_link: uri });
       setLoading(false);

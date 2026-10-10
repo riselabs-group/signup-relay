@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useI18n } from '../../i18n/index.jsx';
 import { generateQrSvgDataUri } from '../../utils/qr.js';
 
 // ponytail: client-side SVG QR and Web Share API; upgrade to downloadable PNG or vCard export if contact interchange needed
 export function ShareCard() {
+  const { t } = useI18n();
   const [name, setName] = useState('Chatchi User');
   const [handle, setHandle] = useState('user@chatchi.org');
   const [copied, setCopied] = useState(false);
@@ -11,10 +13,13 @@ export function ShareCard() {
 
   const handleCopy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(inviteUri).catch(() => {});
+      navigator.clipboard.writeText(inviteUri)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch(() => {});
     }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleNativeShare = async () => {
@@ -32,11 +37,11 @@ export function ShareCard() {
   return (
     <div className="max-w-md mx-auto space-y-6">
       <div className="card bg-base-200 border border-base-300 p-6 shadow-sm space-y-4">
-        <h3 className="text-sm font-bold text-center">ساخت کارت اشتراک‌گذاری شناسه دلتاچت</h3>
+        <h3 className="text-sm font-bold text-center">{t('share_title')}</h3>
 
         <div className="space-y-3">
           <div className="form-control">
-            <label className="label text-xs">نام نمایشی</label>
+            <label className="label text-xs">{t('share_display_name')}</label>
             <input
               type="text"
               value={name}
@@ -45,7 +50,7 @@ export function ShareCard() {
             />
           </div>
           <div className="form-control">
-            <label className="label text-xs">نشانی ایمیل یا دلتاچت</label>
+            <label className="label text-xs">{t('share_handle_label')}</label>
             <input
               type="text"
               value={handle}
@@ -84,7 +89,7 @@ export function ShareCard() {
             onClick={handleCopy}
             className={`btn btn-sm flex-1 ${copied ? 'btn-success text-white' : 'btn-primary'}`}
           >
-            {copied ? 'کپی شد ✓' : 'کپی لینک دعوت'}
+            {copied ? t('index_copied') : t('share_copy_invite')}
           </button>
           {typeof navigator !== 'undefined' && navigator.share && (
             <button
@@ -92,7 +97,7 @@ export function ShareCard() {
               onClick={handleNativeShare}
               className="btn btn-outline btn-sm"
             >
-              اشتراک‌گذاری
+              {t('share_native_button')}
             </button>
           )}
         </div>

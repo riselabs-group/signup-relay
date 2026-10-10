@@ -7,7 +7,18 @@ export function Navbar({ currentRoute, onNavigate, onToggleTheme, currentTheme }
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto h-full px-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
+        <div
+          role="button"
+          tabIndex={0}
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => onNavigate('home')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onNavigate('home');
+            }
+          }}
+        >
           <div className="w-8 h-8 rounded bg-primary text-primary-content font-bold flex items-center justify-center text-sm shadow">
             Δ
           </div>
