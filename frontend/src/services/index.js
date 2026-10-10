@@ -18,7 +18,7 @@ export function createServiceDispatcher({ mode, prod, mock } = {}) {
         try {
           return await target[prop](...args);
         } catch (error) {
-          if (error.status && error.status >= 400 && error.status < 500) {
+          if (error.status && error.status >= 400 && error.status < 500 && error.status !== 408) {
             throw error; // Business errors pass through
           }
           if (typeof console !== 'undefined') {

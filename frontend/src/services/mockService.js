@@ -41,7 +41,7 @@ export const mockService = {
     };
   },
 
-  async createCustomAccount({ username, password }) {
+  async createCustomAccount({ username, password } = {}) {
     if (!username || username.length < 3) {
       throw new Error('Username must be at least 3 characters');
     }

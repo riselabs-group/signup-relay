@@ -50,6 +50,13 @@ test('mockService validates custom account constraints', async () => {
   assert.equal(custom.email, 'validuser@chatchi.org');
   assert.ok(custom.dclogin_link.startsWith('dclogin:'));
   assert.equal(custom.account_type, 'custom');
+
+  await assert.rejects(
+    async () => {
+      await mockService.createCustomAccount();
+    },
+    { message: /at least 3 characters/ }
+  );
 });
 
 test('service dispatcher handles AUTO_FALLBACK to mock when prod fails with 5xx/network error', async () => {
@@ -64,6 +71,24 @@ test('service dispatcher handles AUTO_FALLBACK to mock when prod fails with 5xx/
   const dispatcher = createServiceDispatcher({
     mode: 'AUTO_FALLBACK',
     prod: failingProd,
+    mock: mockService,
+  });
+
+  const config = await dispatcher.getConfig();
+  assert.equal(config.domain, 'chatchi.org');
+});
+
+test('service dispatcher handles AUTO_FALLBACK to mock when prod times out (408)', async () => {
+  const timeoutProd = {
+    getConfig: async () => {
+      const err = new ApiError('Request timed out', 408);
+      throw err;
+    },
+  };
+
+  const dispatcher = createServiceDispatcher({
+    mode: 'AUTO_FALLBACK',
+    prod: timeoutProd,
     mock: mockService,
   });
 
