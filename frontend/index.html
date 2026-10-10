@@ -1,13 +1,44 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="chatchi-dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#11281f" />
-    <title>R.I.S.E</title>
+    <meta name="referrer" content="no-referrer" />
+    <title>Chatchi — DeltaChat Portal</title>
+    <script>
+      (function () {
+        const stored = localStorage.getItem('chatchi_theme');
+        const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'chatchi-dark'
+          : 'chatchi-light';
+        const theme = stored || preferred;
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      html {
+        scrollbar-gutter: stable both-edges;
+        text-rendering: optimizeLegibility;
+      }
+      body {
+        min-height: 100dvh;
+        overflow-x: hidden;
+      }
+      :lang(fa) {
+        font-family: 'Vazirmatn', system-ui, sans-serif;
+        line-height: 1.75;
+      }
+      :lang(en) {
+        font-family: 'Inter', system-ui, sans-serif;
+        line-height: 1.5;
+      }
+    </style>
   </head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
+  <body class="bg-base-100 text-base-content antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
