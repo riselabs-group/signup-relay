@@ -7,7 +7,12 @@ const I18nContext = createContext(null);
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState(() => {
-    return (typeof localStorage !== 'undefined' && localStorage.getItem('chatchi_lang')) || 'fa';
+    try {
+      const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('chatchi_lang') : null;
+      return stored === 'en' ? 'en' : 'fa';
+    } catch (_) {
+      return 'fa';
+    }
   });
 
   const currentDict = lang === 'en' ? en : fa;
@@ -16,7 +21,9 @@ export function I18nProvider({ children }) {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = currentDict.lang;
       document.documentElement.dir = currentDict.dir;
-      localStorage.setItem('chatchi_lang', lang);
+      try {
+        localStorage.setItem('chatchi_lang', lang);
+      } catch (_) {}
     }
   }, [lang, currentDict]);
 

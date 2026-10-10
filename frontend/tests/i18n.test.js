@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { en } from '../src/i18n/en.js';
 import { fa } from '../src/i18n/fa.js';
+
+const baseDir = fs.existsSync(path.resolve(process.cwd(), 'frontend'))
+  ? path.resolve(process.cwd(), 'frontend')
+  : process.cwd();
 
 test('en and fa translation dictionaries have key parity for core keys', () => {
   const criticalKeys = [
@@ -32,3 +38,11 @@ test('en and fa have full symmetric key parity', () => {
   const faKeys = Object.keys(fa).sort();
   assert.deepEqual(enKeys, faKeys, 'en and fa must define the exact same translation keys');
 });
+
+test('index.jsx guards localStorage access with try-catch and sanitizes stored language', () => {
+  const content = fs.readFileSync(path.resolve(baseDir, 'src/i18n/index.jsx'), 'utf8');
+  assert.match(content, /try\s*\{[\s\S]*?localStorage\.getItem[\s\S]*?\}\s*catch/, 'Must guard localStorage.getItem with try-catch');
+  assert.match(content, /try\s*\{[\s\S]*?localStorage\.setItem[\s\S]*?\}\s*catch/, 'Must guard localStorage.setItem with try-catch');
+  assert.match(content, /stored\s*===\s*['"]en['"]\s*\?\s*['"]en['"]\s*:\s*['"]fa['"]/, 'Must sanitize stored language to en or fa default');
+});
+
