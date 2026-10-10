@@ -79,7 +79,7 @@ export function DocsRoute() {
               <button
                 type="button"
                 onClick={() => setActiveId(doc.id)}
-                className={`text-xs py-2 w-full text-right ${activeId === doc.id ? 'active' : ''}`}
+                className={`text-xs py-2 w-full text-start ${activeId === doc.id ? 'active' : ''}`}
               >
                 {doc.title}
               </button>
