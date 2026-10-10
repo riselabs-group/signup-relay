@@ -43,10 +43,12 @@ test('InstantQrCard component file enforces zero-CLS locked dimensions and bdi i
   assert.match(content, /w-56\s+h-56/, 'Must enforce locked dimension QR container (w-56 h-56 / 224px) for zero CLS');
   assert.match(content, /width=["']200["']/, 'Must explicitly set width=200 on QR image');
   assert.match(content, /height=["']200["']/, 'Must explicitly set height=200 on QR image');
+  assert.match(content, /generateQrSvgDataUri\(account\.dclogin_link,\s*200\)/, 'Must use client-side in-memory QR generator');
+  assert.ok(!content.includes('api.qrserver.com'), 'Must not send credentials to third-party QR API');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{account\.email\}<\/bdi>/, 'Must wrap email in <bdi dir="ltr">');
   assert.match(content, /openDeltaChatUri/, 'Must invoke openDeltaChatUri on open action');
   assert.match(content, /index_dc_not_installed/, 'Must display fallback alert when not installed');
-  assert.match(content, /navigator\.clipboard\.writeText/, 'Must copy dclogin link to clipboard');
+  assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText with catch');
 });
 
 test('CustomWizard component enforces 3-step wizard, locked height, Altcha indicator and credential hygiene', () => {
@@ -63,6 +65,10 @@ test('CustomWizard component enforces 3-step wizard, locked height, Altcha indic
   assert.match(content, /Altcha/i, 'Must display Altcha security indicator');
   assert.match(content, /service\.createCustomAccount/, 'Must call service.createCustomAccount');
   assert.match(content, /setPassword\(['"]['"]\)/, 'Must zero out password in state after account creation');
+  assert.match(content, /generateQrSvgDataUri\(result\.dclogin_link,\s*200\)/, 'Must render in-memory QR code for completed custom account');
+  assert.match(content, /openDeltaChatUri/, 'Must provide openDeltaChatUri action on custom completion');
+  assert.match(content, /ManualInstructions/, 'Must render ManualInstructions on custom completion');
+  assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText on custom completion');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@chatchi\.org<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{result\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
 });

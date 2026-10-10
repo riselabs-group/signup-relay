@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '../../i18n/index.jsx';
 import { generateRandomCredentials, buildDcloginUri, openDeltaChatUri } from '../../utils/dclogin.js';
+import { generateQrSvgDataUri } from '../../utils/qr.js';
 import { ManualInstructions } from './ManualInstructions.jsx';
 
 // ponytail: in-memory state for ephemeral QR; upgrade to persistent local storage if tab-recovery needed
@@ -29,7 +30,7 @@ export function InstantQrCard() {
 
   const handleCopy = () => {
     if (!account) return;
-    navigator.clipboard.writeText(account.dclogin_link);
+    navigator.clipboard.writeText(account.dclogin_link).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -56,7 +57,7 @@ export function InstantQrCard() {
           {/* Locked dimension QR Slot (224px / 14rem) eliminates CLS */}
           <div className="w-56 h-56 mx-auto bg-white p-3 rounded-xl border border-base-300 flex items-center justify-center shadow-inner">
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(account.dclogin_link)}`}
+              src={generateQrSvgDataUri(account.dclogin_link, 200)}
               alt="DeltaChat Login QR"
               width="200"
               height="200"

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useI18n } from '../../i18n/index.jsx';
 import { service } from '../../services/index.js';
+import { generateQrSvgDataUri } from '../../utils/qr.js';
+import { openDeltaChatUri } from '../../utils/dclogin.js';
+import { ManualInstructions } from './ManualInstructions.jsx';
 
 // ponytail: wizard with client validation and visual Altcha mock indicator; upgrade to @altcha/altcha-widget if server mandates interactive PoW challenge
 export function CustomWizard() {
@@ -11,6 +14,8 @@ export function CustomWizard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [notInstalled, setNotInstalled] = useState(false);
 
   const handleNext = (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -37,6 +42,18 @@ export function CustomWizard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopy = () => {
+    if (!result || !result.dclogin_link) return;
+    navigator.clipboard.writeText(result.dclogin_link).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenApp = () => {
+    if (!result || !result.dclogin_link) return;
+    openDeltaChatUri(result.dclogin_link, () => setNotInstalled(true));
   };
 
   return (
@@ -89,9 +106,43 @@ export function CustomWizard() {
         )}
 
         {step === 3 && result && (
-          <div className="text-center space-y-3">
-            <div className="badge badge-success text-white py-3 px-4 text-xs">حساب با موفقیت ساخته شد!</div>
-            <p className="text-xs font-semibold"><bdi dir="ltr">{result.email}</bdi></p>
+          <div className="text-center space-y-4 py-2">
+            <div className="badge badge-success text-white py-3 px-4 text-xs font-semibold">حساب با موفقیت ساخته شد!</div>
+
+            {result.dclogin_link && (
+              <div className="w-56 h-56 mx-auto bg-white p-3 rounded-xl border border-base-300 flex items-center justify-center shadow-inner">
+                <img
+                  src={generateQrSvgDataUri(result.dclogin_link, 200)}
+                  alt="DeltaChat Login QR"
+                  width="200"
+                  height="200"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+
+            <p className="text-xs text-base-content/70">
+              <span className="font-semibold"><bdi dir="ltr">{result.email}</bdi></span>
+            </p>
+
+            {result.dclogin_link && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button type="button" onClick={handleOpenApp} className="btn btn-primary btn-sm">
+                  {t('index_open_dc')}
+                </button>
+                <button type="button" onClick={handleCopy} className={`btn btn-sm ${copied ? 'btn-success text-white' : 'btn-outline'}`}>
+                  {copied ? t('index_copied') : t('index_copy_link')}
+                </button>
+              </div>
+            )}
+
+            {notInstalled && (
+              <div className="alert alert-warning text-xs py-2 rounded">
+                <span>{t('index_dc_not_installed')}</span>
+              </div>
+            )}
+
+            {result.dclogin_link && <ManualInstructions dcloginLink={result.dclogin_link} />}
           </div>
         )}
       </div>
@@ -107,7 +158,18 @@ export function CustomWizard() {
             {loading ? <span className="loading loading-spinner loading-xs" /> : t('btn_next')}
           </button>
         ) : (
-          <button onClick={() => { setStep(1); setResult(null); setUsername(''); setPassword(''); }} className="btn btn-outline btn-sm w-full">
+          <button
+            type="button"
+            onClick={() => {
+              setStep(1);
+              setResult(null);
+              setUsername('');
+              setPassword('');
+              setCopied(false);
+              setNotInstalled(false);
+            }}
+            className="btn btn-outline btn-sm w-full"
+          >
             ساخت حساب دیگر
           </button>
         )}
