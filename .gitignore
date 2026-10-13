@@ -6,3 +6,4 @@ frontend/dist/
 .env
 .env.local
 *.log
+graphify-out/
