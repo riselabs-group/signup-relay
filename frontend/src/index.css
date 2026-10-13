@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.bg-delta-pattern {
+  background-image: radial-gradient(circle at 50% -10%, rgba(34, 197, 94, 0.16), transparent 65%),
+                    radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.1), transparent 50%);
+}
+
+[data-theme='chatchi-light'] .bg-delta-pattern {
+  background-image: radial-gradient(circle at 50% -10%, rgba(27, 105, 58, 0.08), transparent 65%),
+                    radial-gradient(circle at 90% 70%, rgba(13, 148, 136, 0.06), transparent 50%);
+}
+
