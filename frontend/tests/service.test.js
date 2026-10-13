@@ -1,17 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mockService } from '../src/services/mockService.js';
-import { createServiceDispatcher } from '../src/services/index.js';
-import { ApiError, request, generateIdempotencyKey } from '../src/api/client.js';
+import { mockService } from '../src/services/mockService.ts';
+import { createServiceDispatcher } from '../src/services/index.ts';
+import { ApiError, request, generateIdempotencyKey } from '../src/api/client.ts';
+import { API_BASE, API_DOMAIN, API_ENDPOINTS } from '../src/api/registry.ts';
+import { SERVICE_CONFIG } from '../src/services/config.ts';
 
 test('mockService returns valid config and instant account DTO', async () => {
   const config = await mockService.getConfig();
-  assert.equal(config.domain, 'chatchi.org');
+  assert.equal(config.domain, SERVICE_CONFIG.DOMAIN);
   assert.equal(config.registration_open, true);
   assert.equal(config.instant_accounts_enabled, true);
 
   const account = await mockService.createInstantAccount();
-  assert.ok(account.email.includes('@chatchi.org'));
+  assert.ok(account.email.includes(`@${SERVICE_CONFIG.DOMAIN}`));
   assert.ok(account.dclogin_link.startsWith('dclogin:'));
   assert.equal(account.account_type, 'instant');
   assert.ok(account.expires_at);
@@ -47,7 +49,7 @@ test('mockService validates custom account constraints', async () => {
     username: 'validuser',
     password: 'StrongPassword123!',
   });
-  assert.equal(custom.email, 'validuser@chatchi.org');
+  assert.equal(custom.email, `validuser@${SERVICE_CONFIG.DOMAIN}`);
   assert.ok(custom.dclogin_link.startsWith('dclogin:'));
   assert.equal(custom.account_type, 'custom');
 
@@ -75,7 +77,7 @@ test('service dispatcher handles AUTO_FALLBACK to mock when prod fails with 5xx/
   });
 
   const config = await dispatcher.getConfig();
-  assert.equal(config.domain, 'chatchi.org');
+  assert.equal(config.domain, SERVICE_CONFIG.DOMAIN);
 });
 
 test('service dispatcher handles AUTO_FALLBACK to mock when prod times out (408)', async () => {
@@ -93,7 +95,7 @@ test('service dispatcher handles AUTO_FALLBACK to mock when prod times out (408)
   });
 
   const config = await dispatcher.getConfig();
-  assert.equal(config.domain, 'chatchi.org');
+  assert.equal(config.domain, SERVICE_CONFIG.DOMAIN);
 });
 
 test('service dispatcher does NOT fallback on 4xx business/client errors', async () => {
@@ -134,7 +136,7 @@ test('service dispatcher respects FORCE_MOCK and FORCE_PROD modes', async () => 
     mock: mockService,
   });
   const mockConfig = await forceMockDispatcher.getConfig();
-  assert.equal(mockConfig.domain, 'chatchi.org');
+  assert.equal(mockConfig.domain, SERVICE_CONFIG.DOMAIN);
   assert.equal(prodCalled, false);
 
   const forceProdDispatcher = createServiceDispatcher({
@@ -147,6 +149,23 @@ test('service dispatcher respects FORCE_MOCK and FORCE_PROD modes', async () => 
   assert.equal(prodCalled, true);
 });
 
+test('service dispatcher handles non-object or nullish error rejections gracefully', async () => {
+  const primitiveThrowingProd = {
+    getConfig: async () => {
+      throw 'Raw string network failure';
+    },
+  };
+
+  const dispatcher = createServiceDispatcher({
+    mode: 'AUTO_FALLBACK',
+    prod: primitiveThrowingProd,
+    mock: mockService,
+  });
+
+  const config = await dispatcher.getConfig();
+  assert.equal(config.domain, SERVICE_CONFIG.DOMAIN);
+});
+
 test('client request supports timeout, idempotency key and ApiError', async () => {
   const key = generateIdempotencyKey();
   assert.ok(key && typeof key === 'string');
@@ -155,4 +174,17 @@ test('client request supports timeout, idempotency key and ApiError', async () =
   assert.equal(err.status, 404);
   assert.equal(err.message, 'Not Found');
   assert.deepEqual(err.data, { detail: 'missing' });
+});
+
+test('API registry defines static base and all standard endpoint paths', () => {
+  assert.equal(API_BASE, '/api/v1');
+  assert.equal(API_DOMAIN, '');
+  assert.equal(API_ENDPOINTS.HEALTH, '/health');
+  assert.equal(API_ENDPOINTS.CONFIG, '/config');
+  assert.equal(API_ENDPOINTS.ALTCHA_CHALLENGE, '/altcha/challenge');
+  assert.equal(API_ENDPOINTS.ACCOUNTS_INSTANT, '/accounts/instant');
+  assert.equal(API_ENDPOINTS.ACCOUNTS_CUSTOM, '/accounts/custom');
+  assert.equal(API_ENDPOINTS.APPS, '/apps');
+  assert.equal(SERVICE_CONFIG.API_BASE_URL, '/api/v1');
+  assert.equal(SERVICE_CONFIG.DOMAIN, 'chatchi.org');
 });

@@ -3,10 +3,15 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getAbsoluteXdcUrl, sendXdcToChat } from '../src/utils/webxdc.js';
+import { getAbsoluteXdcUrl, sendXdcToChat } from '../src/utils/webxdc.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(__dirname, '..');
+const findFile = (base, name) => {
+  const tsx = path.resolve(base, `${name}.tsx`);
+  const jsx = path.resolve(base, `${name}.jsx`);
+  return fs.existsSync(tsx) ? tsx : jsx;
+};
 
 test('getAbsoluteXdcUrl resolves relative package paths to absolute URLs', () => {
   const origin = 'https://chatchi.org';
@@ -79,9 +84,32 @@ test('sendXdcToChat handles null event safely without error', () => {
   }
 });
 
+test('sendXdcToChat rejects javascript: and non-http/https protocol schemes', () => {
+  let assignedUrl = null;
+  const originalWindow = globalThis.window;
+  globalThis.window = {
+    location: {
+      origin: 'https://chatchi.org',
+      assign: (target) => {
+        assignedUrl = target;
+      },
+    },
+  };
+
+  try {
+    sendXdcToChat(null, 'javascript:alert(1)');
+    assert.equal(assignedUrl, null, 'Must reject javascript: scheme');
+
+    sendXdcToChat(null, 'data:text/html,malicious');
+    assert.equal(assignedUrl, null, 'Must reject data: scheme');
+  } finally {
+    globalThis.window = originalWindow;
+  }
+});
+
 test('AppCard component file exists and satisfies mobile WebView navigation and UI specs', () => {
-  const filePath = path.resolve(frontendDir, 'src/components/apps/AppCard.jsx');
-  assert.ok(fs.existsSync(filePath), 'AppCard.jsx must exist');
+  const filePath = findFile(path.resolve(frontendDir, 'src/components/apps'), 'AppCard');
+  assert.ok(fs.existsSync(filePath), 'AppCard.tsx or AppCard.jsx must exist');
   const content = fs.readFileSync(filePath, 'utf8');
 
   assert.match(content, /export function AppCard/, 'Must export AppCard component');
@@ -92,8 +120,8 @@ test('AppCard component file exists and satisfies mobile WebView navigation and 
 });
 
 test('AppModal component file exists and renders dialog with sendXdcToChat install trigger', () => {
-  const filePath = path.resolve(frontendDir, 'src/components/apps/AppModal.jsx');
-  assert.ok(fs.existsSync(filePath), 'AppModal.jsx must exist');
+  const filePath = findFile(path.resolve(frontendDir, 'src/components/apps'), 'AppModal');
+  assert.ok(fs.existsSync(filePath), 'AppModal.tsx or AppModal.jsx must exist');
   const content = fs.readFileSync(filePath, 'utf8');
 
   assert.match(content, /export function AppModal/, 'Must export AppModal component');
@@ -103,8 +131,8 @@ test('AppModal component file exists and renders dialog with sendXdcToChat insta
 });
 
 test('AppsRoute component file exists and integrates catalog, search, advisory box and skeleton', () => {
-  const filePath = path.resolve(frontendDir, 'src/routes/AppsRoute.jsx');
-  assert.ok(fs.existsSync(filePath), 'AppsRoute.jsx must exist');
+  const filePath = findFile(path.resolve(frontendDir, 'src/routes'), 'AppsRoute');
+  assert.ok(fs.existsSync(filePath), 'AppsRoute.tsx or AppsRoute.jsx must exist');
   const content = fs.readFileSync(filePath, 'utf8');
 
   assert.match(content, /export function AppsRoute/, 'Must export AppsRoute component');

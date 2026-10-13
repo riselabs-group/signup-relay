@@ -57,8 +57,10 @@ test('PRIVACY.md covers zero-log, no tracking scripts, and 30-day account expiry
 });
 
 test('DocsRoute component exists with sticky sidebar and topic switcher', () => {
-  const filePath = path.resolve(frontendDir, 'src/routes/DocsRoute.jsx');
-  assert.ok(fs.existsSync(filePath), 'DocsRoute.jsx must exist');
+  const filePath = fs.existsSync(path.resolve(frontendDir, 'src/routes/DocsRoute.tsx'))
+    ? path.resolve(frontendDir, 'src/routes/DocsRoute.tsx')
+    : path.resolve(frontendDir, 'src/routes/DocsRoute.jsx');
+  assert.ok(fs.existsSync(filePath), 'DocsRoute.tsx or DocsRoute.jsx must exist');
   const content = fs.readFileSync(filePath, 'utf8');
 
   assert.match(content, /export function DocsRoute/, 'Must export DocsRoute component');
@@ -67,4 +69,16 @@ test('DocsRoute component exists with sticky sidebar and topic switcher', () => 
   assert.match(content, /security/);
   assert.match(content, /privacy/);
   assert.match(content, /lg:flex-row/, 'Must support responsive sidebar layout');
+});
+
+test('DocsRoute supports markdown rendering with marked and sanitizeHtml', () => {
+  const filePath = fs.existsSync(path.resolve(frontendDir, 'src/routes/DocsRoute.tsx'))
+    ? path.resolve(frontendDir, 'src/routes/DocsRoute.tsx')
+    : path.resolve(frontendDir, 'src/routes/DocsRoute.jsx');
+  const content = fs.readFileSync(filePath, 'utf8');
+
+  assert.match(content, /import\s*\{\s*marked\s*\}\s*from\s*['"]marked['"]/, 'Must import marked');
+  assert.match(content, /marked\.parse/, 'Must parse markdown content');
+  assert.match(content, /sanitizeHtml/, 'Must sanitize parsed markdown HTML');
+  assert.match(content, /dangerouslySetInnerHTML/, 'Must render HTML output');
 });

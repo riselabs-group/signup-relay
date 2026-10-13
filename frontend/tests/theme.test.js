@@ -15,6 +15,7 @@ test('tailwind configuration exports chatchi themes', () => {
   assert.match(content, /chatchi-dark/, 'Must define chatchi-dark theme');
   assert.match(content, /chatchi-light/, 'Must define chatchi-light theme');
   assert.match(content, /Vazirmatn/, 'Must include Vazirmatn font');
+  assert.match(content, /\.\/src\/\*\*\/\*\.\{.*ts.*tsx.*\}/, 'Must scan .ts and .tsx files for tailwind content');
 });
 
 test('index.html contains anti-FOUT theme blocker and stable scrollbar', () => {

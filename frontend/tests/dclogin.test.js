@@ -5,8 +5,8 @@ import {
   generateRandomCredentials,
   generateRandomString,
   openDeltaChatUri,
-} from '../src/utils/dclogin.js';
-import { createQrMatrix, generateQrSvgDataUri } from '../src/utils/qr.js';
+} from '../src/utils/dclogin.ts';
+import { createQrMatrix, generateQrSvgDataUri } from '../src/utils/qr.ts';
 
 test('buildDcloginUri produces valid RFC-compliant dclogin: query parameters', () => {
   const uri = buildDcloginUri({
@@ -48,6 +48,11 @@ test('buildDcloginUri throws if email or password is missing', () => {
   assert.throws(() => buildDcloginUri({ email: 'test@chatchi.org' }), /Email and password are required/);
   assert.throws(() => buildDcloginUri({ password: 'pass' }), /Email and password are required/);
   assert.throws(() => buildDcloginUri(), /Email and password are required/);
+});
+
+test('buildDcloginUri throws if email contains URI fragment or query delimiters', () => {
+  assert.throws(() => buildDcloginUri({ email: 'user#name@chatchi.org', password: '123' }), /Email contains invalid URI characters/);
+  assert.throws(() => buildDcloginUri({ email: 'user?query@chatchi.org', password: '123' }), /Email contains invalid URI characters/);
 });
 
 test('generateRandomCredentials generates entropy satisfying constraints', () => {

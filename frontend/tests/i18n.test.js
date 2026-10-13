@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { en } from '../src/i18n/en.js';
-import { fa } from '../src/i18n/fa.js';
+import { en } from '../src/i18n/en.ts';
+import { fa } from '../src/i18n/fa.ts';
 
 const baseDir = fs.existsSync(path.resolve(process.cwd(), 'frontend'))
   ? path.resolve(process.cwd(), 'frontend')
@@ -39,10 +39,14 @@ test('en and fa have full symmetric key parity', () => {
   assert.deepEqual(enKeys, faKeys, 'en and fa must define the exact same translation keys');
 });
 
-test('index.jsx guards localStorage access with try-catch and sanitizes stored language', () => {
-  const content = fs.readFileSync(path.resolve(baseDir, 'src/i18n/index.jsx'), 'utf8');
+test('index.tsx guards localStorage access with try-catch and sanitizes stored language', () => {
+  const filePath = fs.existsSync(path.resolve(baseDir, 'src/i18n/index.tsx'))
+    ? path.resolve(baseDir, 'src/i18n/index.tsx')
+    : path.resolve(baseDir, 'src/i18n/index.jsx');
+  const content = fs.readFileSync(filePath, 'utf8');
   assert.match(content, /try\s*\{[\s\S]*?localStorage\.getItem[\s\S]*?\}\s*catch/, 'Must guard localStorage.getItem with try-catch');
   assert.match(content, /try\s*\{[\s\S]*?localStorage\.setItem[\s\S]*?\}\s*catch/, 'Must guard localStorage.setItem with try-catch');
   assert.match(content, /stored\s*===\s*['"]en['"]\s*\?\s*['"]en['"]\s*:\s*['"]fa['"]/, 'Must sanitize stored language to en or fa default');
+  assert.match(content, /currentDict\[key\]\s*\?\?\s*fallback\s*\?\?\s*key/, 'Must use nullish coalescing for translations and fallbacks');
 });
 

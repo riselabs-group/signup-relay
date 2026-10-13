@@ -6,6 +6,11 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(__dirname, '..');
+const findFile = (base, name) => {
+  const tsx = path.resolve(base, `${name}.tsx`);
+  const jsx = path.resolve(base, `${name}.jsx`);
+  return fs.existsSync(tsx) ? tsx : jsx;
+};
 
 test('share link formats delta chat invite uri correctly', () => {
   const addr = 'alice@chatchi.org';
@@ -26,8 +31,8 @@ test('share link formats addresses and names with special characters correctly',
 });
 
 test('ShareCard component enforces in-memory vector QR, bdi isolation, and clipboard safety', () => {
-  const filePath = path.resolve(frontendDir, 'src/components/share/ShareCard.jsx');
-  assert.ok(fs.existsSync(filePath), 'ShareCard.jsx must exist');
+  const filePath = findFile(path.resolve(frontendDir, 'src/components/share'), 'ShareCard');
+  assert.ok(fs.existsSync(filePath), 'ShareCard.tsx or ShareCard.jsx must exist');
   const content = fs.readFileSync(filePath, 'utf8');
 
   assert.match(content, /export function ShareCard/, 'Must export ShareCard component');
@@ -41,8 +46,8 @@ test('ShareCard component enforces in-memory vector QR, bdi isolation, and clipb
 });
 
 test('ShareRoute component wraps ShareCard', () => {
-  const filePath = path.resolve(frontendDir, 'src/routes/ShareRoute.jsx');
-  assert.ok(fs.existsSync(filePath), 'ShareRoute.jsx must exist');
+  const filePath = findFile(path.resolve(frontendDir, 'src/routes'), 'ShareRoute');
+  assert.ok(fs.existsSync(filePath), 'ShareRoute.tsx or ShareRoute.jsx must exist');
   const content = fs.readFileSync(filePath, 'utf8');
 
   assert.match(content, /export function ShareRoute/, 'Must export ShareRoute component');
