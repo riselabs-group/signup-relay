@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useI18n } from '../../i18n/index.tsx';
 import { service } from '../../services/index.ts';
 import { SERVICE_CONFIG } from '../../services/config.ts';
 import type { ServerConfig } from '../../services/types.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
 import { openDeltaChatUri } from '../../utils/dclogin.ts';
-import { altchaRequired, apiErrorKey, canSignup, createAccountWithQr, signupErrorKey, validateCustomUsername } from '../../utils/account.ts';
+import { altchaRequired, apiErrorKey, canSignup, createAccountWithQr, signupErrorKey, validateCustomPassword, validateCustomUsername } from '../../utils/account.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
 
@@ -30,11 +31,18 @@ function usernameErrorKey(code: ReturnType<typeof validateCustomUsername>): stri
   return 'validation_username_chars';
 }
 
+function passwordErrorKey(code: ReturnType<typeof validateCustomPassword>): string | null {
+  if (code === 'ok') return null;
+  return `validation_password_${code}`;
+}
+
 // ponytail: 2-step custom onboarding (personalize -> activate) with client Altcha PoW; upgrade to multi-factor if email recovery requested
 export function CustomWizard({ config }: { config: ServerConfig | null }) {
   const { t } = useI18n();
   const [step, setStep] = useState<number>(1);
   const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [altchaPayload, setAltchaPayload] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +64,10 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
     const cleanUsername = username.trim();
     const usernameErr = usernameErrorKey(validateCustomUsername(cleanUsername));
     if (usernameErr) return setError(t(usernameErr));
+    if (password) {
+      const pwErr = passwordErrorKey(validateCustomPassword(password, cleanUsername));
+      if (pwErr) return setError(t(pwErr));
+    }
     if (needAltcha && !altchaPayload) return setError(t('altcha_verifying'));
 
     setError(null);
@@ -65,6 +77,7 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
       const data = await createAccountWithQr({
         config,
         username: cleanUsername,
+        password: password || undefined,
         altchaPayload,
         create: (payload) => service.createCustomAccount(payload),
       });
@@ -96,6 +109,8 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
     setStep(1);
     setAccount(null);
     setUsername('');
+    setPassword('');
+    setShowPassword(false);
     setAltchaPayload(null);
     setError(null);
     setCopied(false);
@@ -119,7 +134,7 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
               <label className="label py-1 text-xs font-semibold text-base-content/80">
                 <span>{t('wizard_username_label')}</span>
               </label>
-              <div className="join w-full">
+              <div className="join w-full" dir="ltr">
                 <input
                   type="text"
                   value={username}
@@ -136,6 +151,34 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
                 <span className="join-item px-2.5 sm:px-3 text-xs bg-base-300/60 text-base-content/70 border border-base-300 flex items-center justify-center shrink-0 select-none">
                   <bdi dir="ltr">@{domain}</bdi>
                 </span>
+              </div>
+            </div>
+
+            <div className="form-control gap-1.5 text-start">
+              <label className="label py-1 text-xs font-semibold text-base-content/80">
+                <span>{t('wizard_password_label')}</span>
+              </label>
+              <div className="join w-full" dir="ltr">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error && ready) setError(null);
+                  }}
+                  placeholder={t('wizard_password_optional')}
+                  className="input input-bordered input-sm join-item flex-1 min-w-0 bg-base-100 text-start text-xs sm:text-sm"
+                  dir="ltr"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="btn btn-sm join-item btn-square"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? t('wizard_password_hide') : t('wizard_password_show')}
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
               </div>
             </div>
 

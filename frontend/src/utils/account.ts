@@ -26,6 +26,22 @@ const RESERVED_NAMES = new Set([
 
 export type CustomUsernameError = 'ok' | 'length' | 'dc_prefix' | 'reserved' | 'dots' | 'chars';
 
+/** ponytail: `-_.` only — skip `$&|;<>\`'"#?@:*~` which break shell/SQL/URI/nginx/IMAP if pasted. Expand if a password manager needs more. */
+export const PASSWORD_SAFE_SYMBOLS = '-_.';
+
+export type CustomPasswordError = 'ok' | 'length' | 'upper' | 'lower' | 'digit' | 'symbol' | 'chars' | 'username';
+
+export function validateCustomPassword(password: string, username = ''): CustomPasswordError {
+  if (password.length < 12) return 'length';
+  if (![...password].every((c) => /[A-Za-z0-9._-]/.test(c))) return 'chars';
+  if (!/[A-Z]/.test(password)) return 'upper';
+  if (!/[a-z]/.test(password)) return 'lower';
+  if (!/[0-9]/.test(password)) return 'digit';
+  if (![...password].some((c) => PASSWORD_SAFE_SYMBOLS.includes(c))) return 'symbol';
+  if (username && password.toLowerCase() === username.trim().toLowerCase()) return 'username';
+  return 'ok';
+}
+
 export function validateCustomUsername(username: string): CustomUsernameError {
   const u = username.trim().toLowerCase();
   if (u.length < 3 || u.length > 32) return 'length';
@@ -121,6 +137,7 @@ export function apiErrorKey(err: unknown): string {
 export interface CreateAccountWithQrOptions {
   config: ServerConfig;
   username: string;
+  password?: string;
   altchaPayload?: string | null;
   create: (payload: InstantAccountPayload) => Promise<{ email: string }>;
 }
@@ -128,6 +145,7 @@ export interface CreateAccountWithQrOptions {
 export async function createAccountWithQr({
   config,
   username,
+  password: givenPassword,
   altchaPayload,
   create,
 }: CreateAccountWithQrOptions): Promise<{ email: string; dclogin_link: string }> {
@@ -139,7 +157,7 @@ export async function createAccountWithQr({
     throw new Error('Mail endpoints are not configured');
   }
 
-  const password = generateRandomString(24);
+  const password = givenPassword || generateRandomString(24);
   const password_hash = await hashPassword(algo, password);
   const payload: InstantAccountPayload = { username, password_hash };
   if (altchaRequired(config)) {

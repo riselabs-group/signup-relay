@@ -8,6 +8,7 @@ import {
   createAccountWithQr,
   endpointsConfigured,
   signupErrorKey,
+  validateCustomPassword,
   validateCustomUsername,
 } from '../src/utils/account.ts';
 import { generateInstantUsername } from '../src/utils/dclogin.ts';
@@ -39,6 +40,35 @@ test('validateCustomUsername accepts 3-32 [a-z0-9._-] without dc_ or reserved', 
   assert.equal(validateCustomUsername('abc'), 'ok');
   assert.equal(validateCustomUsername('user.name-1_x'), 'ok');
   assert.equal(validateCustomUsername('a'.repeat(32)), 'ok');
+});
+
+test('validateCustomPassword requires 12 chars, mixed case, digit, and -_.', () => {
+  assert.equal(validateCustomPassword('Abcdefgh1-xy'), 'ok');
+  assert.equal(validateCustomPassword('Abcdefghij1.'), 'ok');
+  assert.equal(validateCustomPassword('Abcdefghij1_'), 'ok');
+  assert.equal(validateCustomPassword('Abcdefg1-x'), 'length');
+  assert.equal(validateCustomPassword('abcdefgh1-xy'), 'upper');
+  assert.equal(validateCustomPassword('ABCDEFGH1-XY'), 'lower');
+  assert.equal(validateCustomPassword('Abcdefghij-x'), 'digit');
+  assert.equal(validateCustomPassword('Abcdefghij12'), 'symbol');
+  assert.equal(validateCustomPassword('Abcdefgh1-x!'), 'chars');
+  assert.equal(validateCustomPassword('Abcdefgh1-xy', 'abcdefgh1-xy'), 'username');
+});
+
+test('createAccountWithQr hashes a given custom password', async () => {
+  let posted: Record<string, unknown> | null = null;
+  const result = await createAccountWithQr({
+    config: cfg(),
+    username: 'alice',
+    password: 'Abcdefgh1-xy',
+    create: async (payload) => {
+      posted = payload as unknown as Record<string, unknown>;
+      return { email: 'alice@example.org', account_type: 'custom' as const };
+    },
+  });
+  assert.ok(String(posted?.password_hash).startsWith('$argon2id$'));
+  assert.equal(posted?.password, undefined);
+  assert.ok(result.dclogin_link.includes('p=Abcdefgh1-xy'));
 });
 
 test('validateCustomUsername rejects format, dc_ prefix, and reserved names', () => {

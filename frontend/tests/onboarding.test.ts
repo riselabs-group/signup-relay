@@ -133,6 +133,10 @@ test('CustomWizard component enforces 2-step wizard, locked height, AltchaWidget
   assert.match(content, /ManualInstructions/, 'Must render ManualInstructions on custom completion');
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText on custom completion');
   assert.doesNotMatch(content, /service\.getConfig/);
+  assert.match(content, /dir=["']ltr["']/, 'Must pin username+domain join to LTR');
+  assert.match(content, /validateCustomPassword/);
+  assert.match(content, /wizard_password_optional/);
+  assert.match(content, /EyeOff/);
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@\{(?:domain|SERVICE_CONFIG\.DOMAIN)\}<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{account\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
   assert.doesNotMatch(content, /result\.dclogin_link/);

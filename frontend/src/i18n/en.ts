@@ -11,7 +11,6 @@ export interface TranslationDictionary {
   tab_instant: string;
   tab_custom: string;
   index_generate: string;
-  index_creating: string;
   index_open_dc: string;
   index_copy_link: string;
   index_copied: string;
@@ -26,23 +25,14 @@ export interface TranslationDictionary {
   status_offline: string;
   step_1_personalize: string;
   step_2_activate: string;
-  step_1_identity: string;
-  step_2_security: string;
-  step_3_ready: string;
-  altcha_label: string;
   altcha_verifying: string;
   altcha_verified: string;
   altcha_failed: string;
   altcha_click_to_verify: string;
-  btn_next: string;
-  btn_back: string;
   btn_submit: string;
   footer_fs_statement: string;
-  footer_source_license: string;
   footer_powered_by: string;
   footer_version: string;
-  footer_fs_what: string;
-  footer_fs_history: string;
   apps_title: string;
   apps_subtitle: string;
   apps_security_title: string;
@@ -56,7 +46,9 @@ export interface TranslationDictionary {
   share_native_button: string;
   wizard_username_label: string;
   wizard_password_label: string;
-  wizard_altcha_label: string;
+  wizard_password_optional: string;
+  wizard_password_show: string;
+  wizard_password_hide: string;
   wizard_success_badge: string;
   wizard_reset_btn: string;
   app_details: string;
@@ -69,7 +61,13 @@ export interface TranslationDictionary {
   validation_username_reserved: string;
   validation_username_dots: string;
   validation_username_chars: string;
-  validation_password_min: string;
+  validation_password_length: string;
+  validation_password_upper: string;
+  validation_password_lower: string;
+  validation_password_digit: string;
+  validation_password_symbol: string;
+  validation_password_chars: string;
+  validation_password_username: string;
   error_create_account: string;
   error_deltachat_disabled: string;
   error_not_found: string;
@@ -122,7 +120,6 @@ export const en: TranslationDictionary = {
   tab_instant: 'Instant Setup',
   tab_custom: 'Custom Account',
   index_generate: 'Create New Account',
-  index_creating: 'Generating account...',
   index_open_dc: 'Open DeltaChat',
   index_copy_link: 'Copy Link',
   index_copied: 'Copied to clipboard!',
@@ -137,23 +134,14 @@ export const en: TranslationDictionary = {
   status_offline: 'Offline',
   step_1_personalize: '1. Personalization',
   step_2_activate: '2. Activation',
-  step_1_identity: '1. Identity',
-  step_2_security: '2. Security',
-  step_3_ready: '3. Ready',
-  altcha_label: 'Anti-bot Verification',
   altcha_verifying: 'Verifying challenge...',
   altcha_verified: 'Verified',
   altcha_failed: 'Verification failed. Please retry.',
   altcha_click_to_verify: 'I am not a robot',
-  btn_next: 'Next',
-  btn_back: 'Back',
   btn_submit: 'Create Custom Mailbox',
   footer_fs_statement: 'This is a server for communication with DeltaChat.',
-  footer_source_license: 'Source code is released under AGPL-3.0-or-later.',
   footer_powered_by: 'Powered by ChatChi for use with DeltaChat.',
   footer_version: 'Version 0.02.1',
-  footer_fs_what: 'What is Free Software?',
-  footer_fs_history: 'History of Free Software',
   apps_title: 'WebXDC App Store',
   apps_subtitle: 'Independent mini-apps to run inside DeltaChat chats',
   apps_security_title: 'WebXDC Apps Security Notice',
@@ -166,8 +154,10 @@ export const en: TranslationDictionary = {
   share_copy_invite: 'Copy Invite Link',
   share_native_button: 'Share',
   wizard_username_label: 'Desired Username',
-  wizard_password_label: 'Strong Password',
-  wizard_altcha_label: 'Security Verification (Altcha PoW)',
+  wizard_password_label: 'Password (optional)',
+  wizard_password_optional: 'Leave empty to generate one',
+  wizard_password_show: 'Show password',
+  wizard_password_hide: 'Hide password',
   wizard_success_badge: 'Account successfully created!',
   wizard_reset_btn: 'Create Another Account',
   app_details: 'Details',
@@ -180,7 +170,13 @@ export const en: TranslationDictionary = {
   validation_username_reserved: 'Invalid username: Username is reserved',
   validation_username_dots: 'Invalid username: Username cannot start/end with dot or contain consecutive dots',
   validation_username_chars: 'Invalid username: Username contains invalid characters',
-  validation_password_min: 'Password must be at least 8 characters',
+  validation_password_length: 'Password must be at least 12 characters',
+  validation_password_upper: 'Password must include an uppercase letter',
+  validation_password_lower: 'Password must include a lowercase letter',
+  validation_password_digit: 'Password must include a digit',
+  validation_password_symbol: 'Password must include one of - _ .',
+  validation_password_chars: 'Password may only use letters, digits, and - _ .',
+  validation_password_username: 'Password must not match the username',
   error_create_account: 'Failed to create account',
   error_deltachat_disabled: 'DeltaChat module is disabled',
   error_not_found: 'Not found: Endpoint not found',
