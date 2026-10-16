@@ -20,7 +20,12 @@ test('instant account pipeline executes synchronously without network', () => {
     email: creds.email,
     password: creds.password,
     imapHost: 'mail.chatchi.org',
+    imapPort: 993,
+    imapSecurity: 'ssl',
     smtpHost: 'mail.chatchi.org',
+    smtpPort: 465,
+    smtpSecurity: 'ssl',
+    certificateChecks: '1',
   });
 
   assert.ok(uri.startsWith('dclogin:'));

@@ -18,6 +18,7 @@ test('buildDcloginUri produces valid RFC-compliant dclogin: query parameters', (
     smtpHost: 'mail.chatchi.org',
     smtpPort: 465,
     smtpSecurity: 'ssl',
+    certificateChecks: '1',
   });
 
   assert.ok(uri.startsWith('dclogin:user@chatchi.org/?'));
@@ -27,21 +28,27 @@ test('buildDcloginUri produces valid RFC-compliant dclogin: query parameters', (
   assert.ok(uri.includes('p=p%40ss%3Dword%26123'));
 });
 
-test('buildDcloginUri uses default hosts and ports when omitted', () => {
-  const uri = buildDcloginUri({
-    email: 'test@chatchi.org',
-    password: 'secretPassword!',
-  });
+test('buildDcloginUri throws when endpoints or ic omitted', () => {
+  assert.throws(
+    () => buildDcloginUri({ email: 'a@b.c', password: 'x' }),
+    /required/
+  );
+});
 
-  assert.ok(uri.startsWith('dclogin:test@chatchi.org/?'));
-  assert.ok(uri.includes('ih=mail.chatchi.org'));
-  assert.ok(uri.includes('ip=993'));
-  assert.ok(uri.includes('is=ssl'));
-  assert.ok(uri.includes('sh=mail.chatchi.org'));
-  assert.ok(uri.includes('sp=465'));
-  assert.ok(uri.includes('ss=ssl'));
-  assert.ok(uri.includes('v=1'));
-  assert.ok(uri.includes('ic=3'));
+test('buildDcloginUri uses provided ic', () => {
+  const uri = buildDcloginUri({
+    email: 'user@chatchi.org',
+    password: 'p',
+    imapHost: 'imap.example.org',
+    imapPort: 143,
+    imapSecurity: 'starttls',
+    smtpHost: 'smtp.example.org',
+    smtpPort: 587,
+    smtpSecurity: 'plain',
+    certificateChecks: '1',
+  });
+  assert.ok(uri.includes('ic=1'));
+  assert.ok(!uri.includes('ic=3'));
 });
 
 test('buildDcloginUri throws if email or password is missing', () => {
