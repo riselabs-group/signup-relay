@@ -63,10 +63,33 @@ export interface TranslationDictionary {
   app_add_to_chat: string;
   app_close: string;
   validation_username_format: string;
+  validation_username_instant: string;
+  validation_username_length: string;
   validation_username_dc_prefix: string;
   validation_username_reserved: string;
+  validation_username_dots: string;
+  validation_username_chars: string;
   validation_password_min: string;
   error_create_account: string;
+  error_deltachat_disabled: string;
+  error_not_found: string;
+  error_method_not_allowed: string;
+  error_registration_closed: string;
+  error_instant_accounts_disabled: string;
+  error_custom_accounts_disabled: string;
+  error_invalid_password: string;
+  error_invalid_password_hash: string;
+  error_invalid_domain: string;
+  error_invalid_domain_not_configured: string;
+  error_invalid_domain_not_found: string;
+  error_invalid_domain_no_name: string;
+  error_altcha_required: string;
+  error_altcha_invalid: string;
+  error_altcha_replay: string;
+  error_bad_request: string;
+  error_bad_request_body: string;
+  error_internal: string;
+  error_account_exists: string;
   error_unsupported_hash: string;
   error_endpoints_not_configured: string;
   hero_headline: string;
@@ -150,13 +173,36 @@ export const en: TranslationDictionary = {
   app_details: 'Details',
   app_add_to_chat: 'Add to Chat',
   app_close: 'Close',
-  validation_username_format: 'Username must be 3–32 characters: letters, digits, dot, underscore, or hyphen',
-  validation_username_dc_prefix: 'Usernames starting with dc_ are reserved for instant accounts',
-  validation_username_reserved: 'This username is reserved',
+  validation_username_format: 'Invalid username',
+  validation_username_instant: 'Invalid username: Instant username must match dc_ + 12 hex chars',
+  validation_username_length: 'Invalid username: Username must be between 3 and 32 characters',
+  validation_username_dc_prefix: "Invalid username: Username prefix 'dc_' is reserved for instant accounts",
+  validation_username_reserved: 'Invalid username: Username is reserved',
+  validation_username_dots: 'Invalid username: Username cannot start/end with dot or contain consecutive dots',
+  validation_username_chars: 'Invalid username: Username contains invalid characters',
   validation_password_min: 'Password must be at least 8 characters',
   error_create_account: 'Failed to create account',
+  error_deltachat_disabled: 'DeltaChat module is disabled',
+  error_not_found: 'Not found: Endpoint not found',
+  error_method_not_allowed: 'Method not allowed',
+  error_registration_closed: 'Account registration is currently closed',
+  error_instant_accounts_disabled: 'Instant account creation is disabled',
+  error_custom_accounts_disabled: 'Custom account creation is disabled',
+  error_invalid_password: 'Invalid password: Plaintext password is not accepted',
+  error_invalid_password_hash: 'Password hash does not match the configured algorithm',
+  error_invalid_domain: 'Invalid domain',
+  error_invalid_domain_not_configured: 'Invalid domain: Primary domain is not configured',
+  error_invalid_domain_not_found: 'Invalid domain: Primary domain not found',
+  error_invalid_domain_no_name: 'Invalid domain: Domain has no name',
+  error_altcha_required: 'Altcha proof-of-work solution is required',
+  error_altcha_invalid: 'Invalid Altcha challenge solution',
+  error_altcha_replay: 'Altcha challenge solution has already been used',
+  error_bad_request: 'Bad request',
+  error_bad_request_body: 'Bad request: Missing request body',
+  error_internal: 'Internal server error',
+  error_account_exists: 'An account with this email already exists',
   error_unsupported_hash: 'Unsupported hash algorithm',
-  error_endpoints_not_configured: 'Mail endpoints are not configured',
+  error_endpoints_not_configured: 'IMAP/SMTP endpoints are not configured',
   hero_headline: 'Your Address, Your Space.',
   hero_subheadline: 'A distinctive, secure, and decentralized platform for all your communication needs.',
   hero_cta_create_account: 'Create Account Now',

@@ -5,7 +5,7 @@ import { SERVICE_CONFIG } from '../../services/config.ts';
 import type { ServerConfig } from '../../services/types.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
 import { openDeltaChatUri } from '../../utils/dclogin.ts';
-import { altchaRequired, canSignup, createAccountWithQr, signupErrorKey, validateCustomUsername } from '../../utils/account.ts';
+import { altchaRequired, apiErrorKey, canSignup, createAccountWithQr, signupErrorKey, validateCustomUsername } from '../../utils/account.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
 
@@ -25,7 +25,9 @@ function usernameErrorKey(code: ReturnType<typeof validateCustomUsername>): stri
   if (code === 'ok') return null;
   if (code === 'dc_prefix') return 'validation_username_dc_prefix';
   if (code === 'reserved') return 'validation_username_reserved';
-  return 'validation_username_format';
+  if (code === 'length') return 'validation_username_length';
+  if (code === 'dots') return 'validation_username_dots';
+  return 'validation_username_chars';
 }
 
 // ponytail: 2-step custom onboarding (personalize -> activate) with client Altcha PoW; upgrade to multi-factor if email recovery requested
@@ -69,8 +71,7 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
       setAccount({ email: data.email, dclogin_link: data.dclogin_link, account_type: 'custom' });
       setStep(2);
     } catch (err: unknown) {
-      const errorObj = err as Error;
-      setError(errorObj.message || t('error_create_account'));
+      setError(t(apiErrorKey(err)));
     } finally {
       setLoading(false);
     }

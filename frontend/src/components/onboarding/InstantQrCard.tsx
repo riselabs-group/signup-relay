@@ -3,7 +3,7 @@ import { useI18n } from '../../i18n/index.tsx';
 import { service } from '../../services/index.ts';
 import type { ServerConfig } from '../../services/types.ts';
 import { generateInstantUsername, openDeltaChatUri } from '../../utils/dclogin.ts';
-import { altchaRequired, canSignup, createAccountWithQr, signupErrorKey } from '../../utils/account.ts';
+import { altchaRequired, apiErrorKey, canSignup, createAccountWithQr, signupErrorKey } from '../../utils/account.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
@@ -51,8 +51,7 @@ export function InstantQrCard({ config }: { config: ServerConfig | null }) {
       });
       setAccount({ email: data.email, dclogin_link: data.dclogin_link, account_type: 'instant' });
     } catch (err: unknown) {
-      const errorObj = err as Error;
-      setError(errorObj.message || t('error_create_account'));
+      setError(t(apiErrorKey(err)));
     } finally {
       setLoading(false);
     }

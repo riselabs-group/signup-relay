@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { ApiError } from '../src/api/client.ts';
 import {
   altchaRequired,
+  apiErrorKey,
   canSignup,
   createAccountWithQr,
   endpointsConfigured,
@@ -40,11 +42,11 @@ test('validateCustomUsername accepts 3-32 [a-z0-9._-] without dc_ or reserved', 
 });
 
 test('validateCustomUsername rejects format, dc_ prefix, and reserved names', () => {
-  assert.equal(validateCustomUsername('ab'), 'format');
-  assert.equal(validateCustomUsername('a'.repeat(33)), 'format');
-  assert.equal(validateCustomUsername('.abc'), 'format');
-  assert.equal(validateCustomUsername('abc.'), 'format');
-  assert.equal(validateCustomUsername('a..b'), 'format');
+  assert.equal(validateCustomUsername('ab'), 'length');
+  assert.equal(validateCustomUsername('a'.repeat(33)), 'length');
+  assert.equal(validateCustomUsername('.abc'), 'dots');
+  assert.equal(validateCustomUsername('abc.'), 'dots');
+  assert.equal(validateCustomUsername('a..b'), 'dots');
   assert.equal(validateCustomUsername('dc_abcdef012345'), 'dc_prefix');
   assert.equal(validateCustomUsername('admin'), 'reserved');
   assert.equal(validateCustomUsername('postmaster'), 'reserved');
@@ -59,7 +61,8 @@ test('canSignup is false for unsupported algorithm or empty mail hosts', () => {
     false
   );
   assert.equal(signupErrorKey(cfg({ password_hash_algorithm: 'md5' })), 'error_unsupported_hash');
-  assert.equal(signupErrorKey(cfg(), false), 'error_create_account');
+  assert.equal(signupErrorKey(cfg({ registration_open: false })), 'error_registration_closed');
+  assert.equal(signupErrorKey(cfg(), false), 'error_instant_accounts_disabled');
 });
 
 test('altchaRequired follows config.altcha.required', () => {
@@ -104,6 +107,44 @@ test('createAccountWithQr sends altcha_payload only when required', async () => 
     },
   });
   assert.equal(posted?.altcha_payload, 'proof');
+});
+
+test('apiErrorKey maps each Stalwart code; username/domain suffixes split', () => {
+  const api = (code: string, message: string, status = 400) =>
+    new ApiError(message, status, { error: code, message });
+
+  assert.equal(apiErrorKey(api('deltachat_disabled', 'DeltaChat module is disabled', 404)), 'error_deltachat_disabled');
+  assert.equal(apiErrorKey(api('not_found', 'Not found: Endpoint not found', 404)), 'error_not_found');
+  assert.equal(apiErrorKey(api('method_not_allowed', 'Method not allowed', 405)), 'error_method_not_allowed');
+  assert.equal(apiErrorKey(api('registration_closed', 'Account registration is currently closed', 403)), 'error_registration_closed');
+  assert.equal(apiErrorKey(api('instant_accounts_disabled', 'Instant account creation is disabled', 403)), 'error_instant_accounts_disabled');
+  assert.equal(apiErrorKey(api('custom_accounts_disabled', 'Custom account creation is disabled', 403)), 'error_custom_accounts_disabled');
+  assert.equal(apiErrorKey(api('invalid_password', 'Invalid password: Plaintext password is not accepted')), 'error_invalid_password');
+  assert.equal(apiErrorKey(api('invalid_password_hash', 'Password hash does not match the configured algorithm')), 'error_invalid_password_hash');
+  assert.equal(apiErrorKey(api('endpoints_not_configured', 'IMAP/SMTP endpoints are not configured')), 'error_endpoints_not_configured');
+  assert.equal(apiErrorKey(api('altcha_required', 'Altcha proof-of-work solution is required')), 'error_altcha_required');
+  assert.equal(apiErrorKey(api('altcha_invalid', 'Invalid Altcha challenge solution')), 'error_altcha_invalid');
+  assert.equal(apiErrorKey(api('altcha_replay', 'Altcha challenge solution has already been used')), 'error_altcha_replay');
+  assert.equal(apiErrorKey(api('account_already_exists', 'An account with this email already exists', 409)), 'error_account_exists');
+  assert.equal(apiErrorKey(api('internal_error', 'Internal server error: db fail', 500)), 'error_internal');
+  assert.equal(apiErrorKey(api('bad_request', 'Bad request: Missing request body')), 'error_bad_request_body');
+  assert.equal(apiErrorKey(api('bad_request', 'Bad request: expected ident at line 1')), 'error_bad_request');
+
+  assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Instant username must match dc_ + 12 hex chars')), 'validation_username_instant');
+  assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username must be between 3 and 32 characters')), 'validation_username_length');
+  assert.equal(apiErrorKey(api('invalid_username', "Invalid username: Username prefix 'dc_' is reserved for instant accounts")), 'validation_username_dc_prefix');
+  assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username is reserved')), 'validation_username_reserved');
+  assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username cannot start/end with dot or contain consecutive dots')), 'validation_username_dots');
+  assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username contains invalid characters')), 'validation_username_chars');
+  assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: other')), 'validation_username_format');
+
+  assert.equal(apiErrorKey(api('invalid_domain', 'Invalid domain: Primary domain is not configured')), 'error_invalid_domain_not_configured');
+  assert.equal(apiErrorKey(api('invalid_domain', 'Invalid domain: Primary domain not found')), 'error_invalid_domain_not_found');
+  assert.equal(apiErrorKey(api('invalid_domain', 'Invalid domain: Domain has no name')), 'error_invalid_domain_no_name');
+  assert.equal(apiErrorKey(api('invalid_domain', 'Invalid domain: other')), 'error_invalid_domain');
+
+  assert.equal(apiErrorKey(api('nope', 'whatever')), 'error_create_account');
+  assert.equal(apiErrorKey(new Error('Mail endpoints are not configured')), 'error_create_account');
 });
 
 test('createAccountWithQr refuses when altcha is required and payload missing', async () => {

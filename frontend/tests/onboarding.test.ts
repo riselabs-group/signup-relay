@@ -93,6 +93,7 @@ test('InstantQrCard component file enforces zero-CLS locked dimensions and bdi i
   assert.match(content, /needAltcha/, 'Must gate Altcha on config.altcha.required');
   assert.match(content, /service\.createInstantAccount/, 'Must call service.createInstantAccount');
   assert.match(content, /createAccountWithQr/);
+  assert.match(content, /apiErrorKey/);
   assert.match(content, /generateInstantUsername/);
   assert.doesNotMatch(content, /service\.getConfig/);
   assert.doesNotMatch(content, /result\.dclogin_link/);
@@ -125,6 +126,7 @@ test('CustomWizard component enforces 2-step wizard, locked height, AltchaWidget
   assert.match(content, /needAltcha/, 'Must gate Altcha on config.altcha.required');
   assert.match(content, /service\.createCustomAccount/, 'Must call service.createCustomAccount');
   assert.match(content, /createAccountWithQr/);
+  assert.match(content, /apiErrorKey/);
   assert.match(content, /validateCustomUsername/);
   assert.match(content, /generateQrSvgDataUri\(account\.dclogin_link,\s*200\)/, 'Must render in-memory QR code for completed custom account');
   assert.match(content, /openDeltaChatUri/, 'Must provide openDeltaChatUri action on custom completion');

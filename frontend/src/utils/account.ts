@@ -1,3 +1,4 @@
+import { ApiError } from '../api/client.ts';
 import type { InstantAccountPayload, ServerConfig } from '../services/types.ts';
 import { buildDcloginUri, generateRandomString } from './dclogin.ts';
 import { hashPassword, isSupportedHashAlgorithm } from './password-hash.ts';
@@ -23,15 +24,15 @@ const RESERVED_NAMES = new Set([
   'help',
 ]);
 
-export type CustomUsernameError = 'ok' | 'format' | 'dc_prefix' | 'reserved';
+export type CustomUsernameError = 'ok' | 'length' | 'dc_prefix' | 'reserved' | 'dots' | 'chars';
 
 export function validateCustomUsername(username: string): CustomUsernameError {
   const u = username.trim().toLowerCase();
-  if (u.length < 3 || u.length > 32) return 'format';
+  if (u.length < 3 || u.length > 32) return 'length';
   if (u.startsWith('dc_')) return 'dc_prefix';
   if (RESERVED_NAMES.has(u)) return 'reserved';
-  if (u.startsWith('.') || u.endsWith('.') || u.includes('..')) return 'format';
-  if (![...u].every((c) => /[a-z0-9._-]/.test(c))) return 'format';
+  if (u.startsWith('.') || u.endsWith('.') || u.includes('..')) return 'dots';
+  if (![...u].every((c) => /[a-z0-9._-]/.test(c))) return 'chars';
   return 'ok';
 }
 
@@ -50,12 +51,71 @@ export function canSignup(config: ServerConfig): boolean {
 export function signupErrorKey(config: ServerConfig, kindEnabled = true): string | null {
   if (!isSupportedHashAlgorithm(config.password_hash_algorithm)) return 'error_unsupported_hash';
   if (!endpointsConfigured(config)) return 'error_endpoints_not_configured';
-  if (!config.registration_open || !kindEnabled) return 'error_create_account';
+  if (!config.registration_open) return 'error_registration_closed';
+  if (!kindEnabled) return 'error_instant_accounts_disabled';
   return null;
 }
 
 export function altchaRequired(config: ServerConfig): boolean {
   return config.altcha?.required === true;
+}
+
+const CODE_KEY: Record<string, string> = {
+  deltachat_disabled: 'error_deltachat_disabled',
+  not_found: 'error_not_found',
+  method_not_allowed: 'error_method_not_allowed',
+  registration_closed: 'error_registration_closed',
+  instant_accounts_disabled: 'error_instant_accounts_disabled',
+  custom_accounts_disabled: 'error_custom_accounts_disabled',
+  invalid_password: 'error_invalid_password',
+  invalid_password_hash: 'error_invalid_password_hash',
+  endpoints_not_configured: 'error_endpoints_not_configured',
+  altcha_required: 'error_altcha_required',
+  altcha_invalid: 'error_altcha_invalid',
+  altcha_replay: 'error_altcha_replay',
+  account_already_exists: 'error_account_exists',
+  internal_error: 'error_internal',
+};
+
+const USERNAME_SUFFIX: Record<string, string> = {
+  'Instant username must match dc_ + 12 hex chars': 'validation_username_instant',
+  'Username must be between 3 and 32 characters': 'validation_username_length',
+  "Username prefix 'dc_' is reserved for instant accounts": 'validation_username_dc_prefix',
+  'Username is reserved': 'validation_username_reserved',
+  'Username cannot start/end with dot or contain consecutive dots': 'validation_username_dots',
+  'Username contains invalid characters': 'validation_username_chars',
+};
+
+const DOMAIN_SUFFIX: Record<string, string> = {
+  'Primary domain is not configured': 'error_invalid_domain_not_configured',
+  'Primary domain not found': 'error_invalid_domain_not_found',
+  'Domain has no name': 'error_invalid_domain_no_name',
+};
+
+function suffixAfter(message: string, prefix: string): string {
+  return message.startsWith(prefix) ? message.slice(prefix.length) : message;
+}
+
+export function apiErrorKey(err: unknown): string {
+  if (!(err instanceof ApiError) || !err.data || typeof err.data !== 'object') {
+    return 'error_create_account';
+  }
+  const obj = err.data as { error?: unknown; message?: unknown };
+  const code = obj.error;
+  const message = typeof obj.message === 'string' ? obj.message : '';
+  if (code === 'invalid_username') {
+    return USERNAME_SUFFIX[suffixAfter(message, 'Invalid username: ')] ?? 'validation_username_format';
+  }
+  if (code === 'invalid_domain') {
+    return DOMAIN_SUFFIX[suffixAfter(message, 'Invalid domain: ')] ?? 'error_invalid_domain';
+  }
+  if (code === 'bad_request') {
+    return suffixAfter(message, 'Bad request: ') === 'Missing request body'
+      ? 'error_bad_request_body'
+      : 'error_bad_request';
+  }
+  if (typeof code === 'string' && CODE_KEY[code]) return CODE_KEY[code];
+  return 'error_create_account';
 }
 
 export interface CreateAccountWithQrOptions {
