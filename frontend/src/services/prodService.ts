@@ -24,17 +24,17 @@ export const prodService: IService = {
   getAltchaChallenge: (): Promise<AltchaChallenge> =>
     request<AltchaChallenge>(API_ENDPOINTS.ALTCHA_CHALLENGE, {}, SERVICE_CONFIG.API_BASE_URL),
 
-  createInstantAccount: (payload?: InstantAccountPayload): Promise<InstantAccountResult> =>
+  createInstantAccount: (payload: InstantAccountPayload): Promise<InstantAccountResult> =>
     request<InstantAccountResult>(
       API_ENDPOINTS.ACCOUNTS_INSTANT,
-      { method: 'POST', body: JSON.stringify(payload || {}), idempotent: true },
+      { method: 'POST', body: JSON.stringify(payload), idempotent: true },
       SERVICE_CONFIG.API_BASE_URL
     ),
 
   createCustomAccount: (payload: CustomAccountPayload): Promise<CustomAccountResult> =>
     request<CustomAccountResult>(
       API_ENDPOINTS.ACCOUNTS_CUSTOM,
-      { method: 'POST', body: JSON.stringify(payload || {}), idempotent: true },
+      { method: 'POST', body: JSON.stringify(payload), idempotent: true },
       SERVICE_CONFIG.API_BASE_URL
     ),
 

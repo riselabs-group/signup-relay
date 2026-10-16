@@ -8,7 +8,7 @@ import { solveAltcha, sha256Hex } from '../src/utils/altcha.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(__dirname, '..');
-const findFile = (base, name) => {
+const findFile = (base: string, name: string) => {
   const tsx = path.resolve(base, `${name}.tsx`);
   const jsx = path.resolve(base, `${name}.jsx`);
   return fs.existsSync(tsx) ? tsx : jsx;
@@ -91,6 +91,11 @@ test('InstantQrCard component file enforces zero-CLS locked dimensions and bdi i
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText with catch');
   assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget');
   assert.match(content, /service\.createInstantAccount/, 'Must call service.createInstantAccount');
+  assert.match(content, /buildDcloginUri\(/);
+  assert.match(content, /hashPassword/);
+  assert.match(content, /generateInstantUsername/);
+  assert.match(content, /password_hash/);
+  assert.doesNotMatch(content, /result\.dclogin_link|data\.dclogin_link/);
 });
 
 test('AltchaWidget component exists and handles verification challenge', () => {
@@ -119,13 +124,17 @@ test('CustomWizard component enforces 2-step wizard, locked height, AltchaWidget
   assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget in step 1');
   assert.match(content, /service\.createCustomAccount/, 'Must call service.createCustomAccount');
   assert.match(content, /generateRandomString\(24\)/, 'Must auto-generate strong random password in client');
-  assert.match(content, /generateQrSvgDataUri\(result\.dclogin_link,\s*200\)/, 'Must render in-memory QR code for completed custom account');
+  assert.match(content, /generateQrSvgDataUri\(account\.dclogin_link,\s*200\)/, 'Must render in-memory QR code for completed custom account');
   assert.match(content, /openDeltaChatUri/, 'Must provide openDeltaChatUri action on custom completion');
   assert.match(content, /ManualInstructions/, 'Must render ManualInstructions on custom completion');
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText on custom completion');
   assert.match(content, /service\.getConfig/, 'Must fetch config to populate server domain');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@\{(?:domain|SERVICE_CONFIG\.DOMAIN)\}<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
-  assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{result\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
+  assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{account\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
+  assert.match(content, /buildDcloginUri\(/);
+  assert.match(content, /hashPassword/);
+  assert.match(content, /password_hash/);
+  assert.doesNotMatch(content, /result\.dclogin_link|data\.dclogin_link/);
 });
 
 test('OnboardingRoute component renders hero with CTA, feature cards, and bottom account setup with online/offline badge', () => {

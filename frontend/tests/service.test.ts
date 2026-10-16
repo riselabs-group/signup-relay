@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mockService } from '../src/services/mockService.ts';
 import { createServiceDispatcher } from '../src/services/index.ts';
-import { ApiError, request, generateIdempotencyKey } from '../src/api/client.ts';
+import { ApiError, generateIdempotencyKey } from '../src/api/client.ts';
 import { API_BASE, API_DOMAIN, API_ENDPOINTS } from '../src/api/registry.ts';
 import { SERVICE_CONFIG } from '../src/services/config.ts';
 
@@ -11,12 +11,19 @@ test('mockService returns valid config and instant account DTO', async () => {
   assert.equal(config.domain, SERVICE_CONFIG.DOMAIN);
   assert.equal(config.registration_open, true);
   assert.equal(config.instant_accounts_enabled, true);
+  assert.equal(config.password_hash_algorithm, 'argon2id');
+  assert.ok(config.certificate_checks);
+  assert.ok(config.endpoints?.imap?.host);
+  assert.ok(config.endpoints?.smtp?.host);
 
-  const account = await mockService.createInstantAccount();
+  const account = await mockService.createInstantAccount({
+    username: 'dc_testuser',
+    password_hash: '$argon2id$v=19$m=19456,t=2,p=1$c2FsdA$hash',
+  });
   assert.ok(account.email.includes(`@${SERVICE_CONFIG.DOMAIN}`));
-  assert.ok(account.dclogin_link.startsWith('dclogin:'));
   assert.equal(account.account_type, 'instant');
-  assert.ok(account.expires_at);
+  assert.ok(!('dclogin_link' in account));
+  assert.ok(!('password' in account));
 });
 
 test('mockService returns altcha challenge and apps', async () => {
@@ -33,29 +40,22 @@ test('mockService returns altcha challenge and apps', async () => {
 test('mockService validates custom account constraints', async () => {
   await assert.rejects(
     async () => {
-      await mockService.createCustomAccount({ username: 'ab', password: '123' });
+      await mockService.createCustomAccount({ username: 'ab', password_hash: 'hash' });
     },
     { message: /at least 3 characters/ }
   );
 
-  await assert.rejects(
-    async () => {
-      await mockService.createCustomAccount({ username: 'validuser', password: 'short' });
-    },
-    { message: /at least 8 characters/ }
-  );
-
   const custom = await mockService.createCustomAccount({
     username: 'validuser',
-    password: 'StrongPassword123!',
+    password_hash: '$argon2id$v=19$m=19456,t=2,p=1$c2FsdA$hash',
   });
   assert.equal(custom.email, `validuser@${SERVICE_CONFIG.DOMAIN}`);
-  assert.ok(custom.dclogin_link.startsWith('dclogin:'));
   assert.equal(custom.account_type, 'custom');
+  assert.ok(!('dclogin_link' in custom));
 
   await assert.rejects(
     async () => {
-      await mockService.createCustomAccount();
+      await mockService.createCustomAccount({ username: '', password_hash: 'hash' });
     },
     { message: /at least 3 characters/ }
   );
@@ -64,7 +64,7 @@ test('mockService validates custom account constraints', async () => {
 test('service dispatcher handles AUTO_FALLBACK to mock when prod fails with 5xx/network error', async () => {
   const failingProd = {
     getConfig: async () => {
-      const err = new Error('Network error');
+      const err = new Error('Network error') as Error & { status: number };
       err.status = 502;
       throw err;
     },
@@ -72,7 +72,7 @@ test('service dispatcher handles AUTO_FALLBACK to mock when prod fails with 5xx/
 
   const dispatcher = createServiceDispatcher({
     mode: 'AUTO_FALLBACK',
-    prod: failingProd,
+    prod: failingProd as never,
     mock: mockService,
   });
 
@@ -90,7 +90,7 @@ test('service dispatcher handles AUTO_FALLBACK to mock when prod times out (408)
 
   const dispatcher = createServiceDispatcher({
     mode: 'AUTO_FALLBACK',
-    prod: timeoutProd,
+    prod: timeoutProd as never,
     mock: mockService,
   });
 
@@ -101,7 +101,7 @@ test('service dispatcher handles AUTO_FALLBACK to mock when prod times out (408)
 test('service dispatcher does NOT fallback on 4xx business/client errors', async () => {
   const failingProd = {
     createCustomAccount: async () => {
-      const err = new Error('Username already taken');
+      const err = new Error('Username already taken') as Error & { status: number };
       err.status = 409;
       throw err;
     },
@@ -109,13 +109,13 @@ test('service dispatcher does NOT fallback on 4xx business/client errors', async
 
   const dispatcher = createServiceDispatcher({
     mode: 'AUTO_FALLBACK',
-    prod: failingProd,
+    prod: failingProd as never,
     mock: mockService,
   });
 
   await assert.rejects(
     async () => {
-      await dispatcher.createCustomAccount({ username: 'existing', password: 'password123' });
+      await dispatcher.createCustomAccount({ username: 'existing', password_hash: 'hash' });
     },
     { message: /Username already taken/ }
   );
@@ -132,7 +132,7 @@ test('service dispatcher respects FORCE_MOCK and FORCE_PROD modes', async () => 
 
   const forceMockDispatcher = createServiceDispatcher({
     mode: 'FORCE_MOCK',
-    prod: dummyProd,
+    prod: dummyProd as never,
     mock: mockService,
   });
   const mockConfig = await forceMockDispatcher.getConfig();
@@ -141,7 +141,7 @@ test('service dispatcher respects FORCE_MOCK and FORCE_PROD modes', async () => 
 
   const forceProdDispatcher = createServiceDispatcher({
     mode: 'FORCE_PROD',
-    prod: dummyProd,
+    prod: dummyProd as never,
     mock: mockService,
   });
   const prodConfig = await forceProdDispatcher.getConfig();
@@ -158,7 +158,7 @@ test('service dispatcher handles non-object or nullish error rejections graceful
 
   const dispatcher = createServiceDispatcher({
     mode: 'AUTO_FALLBACK',
-    prod: primitiveThrowingProd,
+    prod: primitiveThrowingProd as never,
     mock: mockService,
   });
 

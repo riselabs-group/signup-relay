@@ -18,7 +18,9 @@ export interface ServerConfig {
   domain: string;
   registration_open: boolean;
   instant_accounts_enabled?: boolean;
-  endpoints?: EndpointsConfig;
+  password_hash_algorithm: string;
+  certificate_checks: string;
+  endpoints: EndpointsConfig;
   altcha?: AltchaConfig;
 }
 
@@ -31,28 +33,26 @@ export interface AltchaChallenge {
 }
 
 export interface InstantAccountPayload {
+  username: string;
+  password_hash: string;
   altcha_payload?: string;
 }
 
 export interface CustomAccountPayload {
   username: string;
-  password: string;
+  password_hash: string;
   altcha_payload?: string;
 }
 
 export interface InstantAccountResult {
   account_id?: string;
   email: string;
-  password: string;
-  dclogin_link: string;
   account_type: 'instant';
-  expires_at?: string;
 }
 
 export interface CustomAccountResult {
   account_id?: string;
   email: string;
-  dclogin_link: string;
   account_type: 'custom';
 }
 
@@ -74,7 +74,7 @@ export interface WebxdcCatalog {
 export interface IService {
   getConfig(): Promise<ServerConfig>;
   getAltchaChallenge(): Promise<AltchaChallenge>;
-  createInstantAccount(payload?: InstantAccountPayload): Promise<InstantAccountResult>;
+  createInstantAccount(payload: InstantAccountPayload): Promise<InstantAccountResult>;
   createCustomAccount(payload: CustomAccountPayload): Promise<CustomAccountResult>;
   getApps(): Promise<WebxdcCatalog>;
 }
