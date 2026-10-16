@@ -89,13 +89,13 @@ test('InstantQrCard component file enforces zero-CLS locked dimensions and bdi i
   assert.match(content, /openDeltaChatUri/, 'Must invoke openDeltaChatUri on open action');
   assert.match(content, /index_dc_not_installed/, 'Must display fallback alert when not installed');
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText with catch');
-  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget');
+  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget when altcha.required');
+  assert.match(content, /needAltcha/, 'Must gate Altcha on config.altcha.required');
   assert.match(content, /service\.createInstantAccount/, 'Must call service.createInstantAccount');
-  assert.match(content, /buildDcloginUri\(/);
-  assert.match(content, /hashPassword/);
+  assert.match(content, /createAccountWithQr/);
   assert.match(content, /generateInstantUsername/);
-  assert.match(content, /password_hash/);
-  assert.doesNotMatch(content, /result\.dclogin_link|data\.dclogin_link/);
+  assert.doesNotMatch(content, /service\.getConfig/);
+  assert.doesNotMatch(content, /result\.dclogin_link/);
 });
 
 test('AltchaWidget component exists and handles verification challenge', () => {
@@ -121,20 +121,19 @@ test('CustomWizard component enforces 2-step wizard, locked height, AltchaWidget
   assert.match(content, /steps\s+steps-horizontal/, 'Must render DaisyUI steps');
   assert.match(content, /step_1_personalize/, 'Must render Step 1 Personalization');
   assert.match(content, /step_2_activate/, 'Must render Step 2 Activation');
-  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget in step 1');
+  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget in step 1 when required');
+  assert.match(content, /needAltcha/, 'Must gate Altcha on config.altcha.required');
   assert.match(content, /service\.createCustomAccount/, 'Must call service.createCustomAccount');
-  assert.match(content, /generateRandomString\(24\)/, 'Must auto-generate strong random password in client');
+  assert.match(content, /createAccountWithQr/);
+  assert.match(content, /validateCustomUsername/);
   assert.match(content, /generateQrSvgDataUri\(account\.dclogin_link,\s*200\)/, 'Must render in-memory QR code for completed custom account');
   assert.match(content, /openDeltaChatUri/, 'Must provide openDeltaChatUri action on custom completion');
   assert.match(content, /ManualInstructions/, 'Must render ManualInstructions on custom completion');
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText on custom completion');
-  assert.match(content, /service\.getConfig/, 'Must fetch config to populate server domain');
+  assert.doesNotMatch(content, /service\.getConfig/);
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@\{(?:domain|SERVICE_CONFIG\.DOMAIN)\}<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{account\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
-  assert.match(content, /buildDcloginUri\(/);
-  assert.match(content, /hashPassword/);
-  assert.match(content, /password_hash/);
-  assert.doesNotMatch(content, /result\.dclogin_link|data\.dclogin_link/);
+  assert.doesNotMatch(content, /result\.dclogin_link/);
 });
 
 test('OnboardingRoute component renders hero with CTA, feature cards, and bottom account setup with online/offline badge', () => {
@@ -155,6 +154,7 @@ test('OnboardingRoute component renders hero with CTA, feature cards, and bottom
   assert.match(content, /role=["']tablist["']/, 'Must render tab list with role="tablist"');
   assert.match(content, /tabs-boxed/, 'Must use DaisyUI tabs-boxed styling');
   assert.match(content, /min-h-\[380px\]/, 'Must enforce locked tab body container height (min-h-[380px])');
-  assert.match(content, /<InstantQrCard\s*\/>/, 'Must render InstantQrCard');
-  assert.match(content, /<CustomWizard\s*\/>/, 'Must render CustomWizard');
+  assert.match(content, /service\.getConfig/, 'Must fetch config once at the route');
+  assert.match(content, /<InstantQrCard\s+config=\{config\}/, 'Must pass config into InstantQrCard');
+  assert.match(content, /<CustomWizard\s+config=\{config\}/, 'Must pass config into CustomWizard');
 });

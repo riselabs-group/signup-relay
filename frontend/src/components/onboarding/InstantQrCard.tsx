@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useI18n } from '../../i18n/index.tsx';
 import { service } from '../../services/index.ts';
 import type { ServerConfig } from '../../services/types.ts';
-import { buildDcloginUri, generateInstantUsername, generateRandomString, openDeltaChatUri } from '../../utils/dclogin.ts';
-import { hashPassword, isSupportedHashAlgorithm } from '../../utils/password-hash.ts';
+import { generateInstantUsername, openDeltaChatUri } from '../../utils/dclogin.ts';
+import { altchaRequired, canSignup, createAccountWithQr, signupErrorKey } from '../../utils/account.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
@@ -14,64 +14,42 @@ type InstantAccountState = {
   account_type: 'instant';
 };
 
+function blockMsg(config: ServerConfig | null, t: (k: string) => string): string | null {
+  if (!config) return null;
+  const key = signupErrorKey(config, config.instant_accounts_enabled !== false);
+  return key ? t(key) : null;
+}
+
 // ponytail: in-memory state for ephemeral QR; upgrade to persistent local storage if tab-recovery needed
-export function InstantQrCard() {
+export function InstantQrCard({ config }: { config: ServerConfig | null }) {
   const { t } = useI18n();
   const [account, setAccount] = useState<InstantAccountState | null>(null);
-  const [config, setConfig] = useState<ServerConfig | null>(null);
   const [altchaPayload, setAltchaPayload] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const [notInstalled, setNotInstalled] = useState<boolean>(false);
   const cleanupRef = useRef<(() => void) | null>(null);
-  const hashOk = !!config && isSupportedHashAlgorithm(config.password_hash_algorithm);
+  const ready = !!config && canSignup(config) && config.instant_accounts_enabled !== false;
+  const needAltcha = !!config && altchaRequired(config);
+  const shownError = error || blockMsg(config, t);
 
-  useEffect(() => {
-    let mounted = true;
-    service.getConfig()
-      .then((cfg) => {
-        if (!mounted) return;
-        setConfig(cfg);
-        if (!isSupportedHashAlgorithm(cfg.password_hash_algorithm)) {
-          setError('Unsupported hash algorithm');
-        }
-      })
-      .catch((err: unknown) => {
-        if (!mounted) return;
-        setError((err as Error).message || t('error_create_account'));
-      });
-    return () => {
-      cleanupRef.current?.();
-      mounted = false;
-    };
-  }, [t]);
+  useEffect(() => () => { cleanupRef.current?.(); }, []);
 
   const handleGenerate = async () => {
-    if (!altchaPayload || !config) return;
-    const algo = config.password_hash_algorithm;
-    if (!isSupportedHashAlgorithm(algo)) return;
+    if (!config || !ready) return;
+    if (needAltcha && !altchaPayload) return;
     setLoading(true);
     setError(null);
     setNotInstalled(false);
     try {
-      const username = generateInstantUsername();
-      const password = generateRandomString(24);
-      const email = `${username}@${config.domain}`;
-      const password_hash = await hashPassword(algo, password);
-      const dclogin_link = buildDcloginUri({
-        email,
-        password,
-        imapHost: config.endpoints.imap.host,
-        imapPort: config.endpoints.imap.port,
-        imapSecurity: config.endpoints.imap.security,
-        smtpHost: config.endpoints.smtp.host,
-        smtpPort: config.endpoints.smtp.port,
-        smtpSecurity: config.endpoints.smtp.security,
-        certificateChecks: config.certificate_checks,
+      const data = await createAccountWithQr({
+        config,
+        username: generateInstantUsername(),
+        altchaPayload,
+        create: (payload) => service.createInstantAccount(payload),
       });
-      const data = await service.createInstantAccount({ username, password_hash, altcha_payload: altchaPayload });
-      setAccount({ email: data.email, dclogin_link, account_type: 'instant' });
+      setAccount({ email: data.email, dclogin_link: data.dclogin_link, account_type: 'instant' });
     } catch (err: unknown) {
       const errorObj = err as Error;
       setError(errorObj.message || t('error_create_account'));
@@ -83,7 +61,7 @@ export function InstantQrCard() {
   const handleReset = () => {
     setAccount(null);
     setAltchaPayload(null);
-    setError(hashOk ? null : 'Unsupported hash algorithm');
+    setError(null);
     setCopied(false);
     setNotInstalled(false);
   };
@@ -107,20 +85,22 @@ export function InstantQrCard() {
     <div className="flex flex-col items-center text-center space-y-4">
       {!account ? (
         <div className="w-full max-w-xs space-y-3 py-6">
-          {error && <div className="alert alert-error text-xs py-2 rounded text-start">{error}</div>}
+          {shownError && <div className="alert alert-error text-xs py-2 rounded text-start">{shownError}</div>}
 
-          <AltchaWidget
-            onVerified={(payload) => {
-              setAltchaPayload(payload);
-              if (error && hashOk) setError(null);
-            }}
-            autoVerify={true}
-          />
+          {needAltcha && (
+            <AltchaWidget
+              onVerified={(payload) => {
+                setAltchaPayload(payload);
+                if (error && ready) setError(null);
+              }}
+              autoVerify={true}
+            />
+          )}
 
           <button
             type="button"
             onClick={handleGenerate}
-            disabled={loading || !altchaPayload || !hashOk}
+            disabled={loading || !ready || (needAltcha && !altchaPayload)}
             className="btn btn-primary btn-md w-full shadow"
           >
             {loading ? <span className="loading loading-spinner loading-sm" /> : t('index_generate')}

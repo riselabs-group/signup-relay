@@ -4,8 +4,8 @@ import { service } from '../../services/index.ts';
 import { SERVICE_CONFIG } from '../../services/config.ts';
 import type { ServerConfig } from '../../services/types.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
-import { buildDcloginUri, generateRandomString, openDeltaChatUri } from '../../utils/dclogin.ts';
-import { hashPassword, isSupportedHashAlgorithm } from '../../utils/password-hash.ts';
+import { openDeltaChatUri } from '../../utils/dclogin.ts';
+import { altchaRequired, canSignup, createAccountWithQr, signupErrorKey, validateCustomUsername } from '../../utils/account.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
 
@@ -15,13 +15,24 @@ type CustomAccountState = {
   account_type: 'custom';
 };
 
+function blockMsg(config: ServerConfig | null, t: (k: string) => string): string | null {
+  if (!config) return null;
+  const key = signupErrorKey(config);
+  return key ? t(key) : null;
+}
+
+function usernameErrorKey(code: ReturnType<typeof validateCustomUsername>): string | null {
+  if (code === 'ok') return null;
+  if (code === 'dc_prefix') return 'validation_username_dc_prefix';
+  if (code === 'reserved') return 'validation_username_reserved';
+  return 'validation_username_format';
+}
+
 // ponytail: 2-step custom onboarding (personalize -> activate) with client Altcha PoW; upgrade to multi-factor if email recovery requested
-export function CustomWizard() {
+export function CustomWizard({ config }: { config: ServerConfig | null }) {
   const { t } = useI18n();
   const [step, setStep] = useState<number>(1);
   const [username, setUsername] = useState<string>('');
-  const [domain, setDomain] = useState<string>(SERVICE_CONFIG.DOMAIN);
-  const [config, setConfig] = useState<ServerConfig | null>(null);
   const [altchaPayload, setAltchaPayload] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,69 +40,33 @@ export function CustomWizard() {
   const [copied, setCopied] = useState<boolean>(false);
   const [notInstalled, setNotInstalled] = useState<boolean>(false);
   const cleanupRef = useRef<(() => void) | null>(null);
-  const hashOk = !!config && isSupportedHashAlgorithm(config.password_hash_algorithm);
+  const ready = !!config && canSignup(config);
+  const needAltcha = !!config && altchaRequired(config);
+  const domain = config?.domain || SERVICE_CONFIG.DOMAIN;
+  const shownError = error || blockMsg(config, t);
 
-  useEffect(() => {
-    let mounted = true;
-    service.getConfig()
-      .then((cfg) => {
-        if (!mounted) return;
-        setConfig(cfg);
-        if (cfg?.domain) setDomain(cfg.domain);
-        if (!isSupportedHashAlgorithm(cfg.password_hash_algorithm)) {
-          setError('Unsupported hash algorithm');
-        }
-      })
-      .catch((err: unknown) => {
-        if (!mounted) return;
-        setError((err as Error).message || t('error_create_account'));
-      });
-
-    return () => {
-      cleanupRef.current?.();
-      mounted = false;
-    };
-  }, [t]);
+  useEffect(() => () => { cleanupRef.current?.(); }, []);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (!config) return;
-    const algo = config.password_hash_algorithm;
-    if (!isSupportedHashAlgorithm(algo)) return;
+    if (!config || !ready) return;
 
-    const usernameRegex = /^[a-z0-9][a-z0-9._-]{1,30}[a-z0-9]$/i;
     const cleanUsername = username.trim();
-    if (!usernameRegex.test(cleanUsername)) {
-      return setError(t('validation_username_format'));
-    }
-    if (!altchaPayload) {
-      return setError(t('altcha_verifying'));
-    }
+    const usernameErr = usernameErrorKey(validateCustomUsername(cleanUsername));
+    if (usernameErr) return setError(t(usernameErr));
+    if (needAltcha && !altchaPayload) return setError(t('altcha_verifying'));
 
     setError(null);
     setLoading(true);
 
     try {
-      const password = generateRandomString(24);
-      const email = `${cleanUsername}@${config.domain}`;
-      const password_hash = await hashPassword(algo, password);
-      const dclogin_link = buildDcloginUri({
-        email,
-        password,
-        imapHost: config.endpoints.imap.host,
-        imapPort: config.endpoints.imap.port,
-        imapSecurity: config.endpoints.imap.security,
-        smtpHost: config.endpoints.smtp.host,
-        smtpPort: config.endpoints.smtp.port,
-        smtpSecurity: config.endpoints.smtp.security,
-        certificateChecks: config.certificate_checks,
-      });
-      const data = await service.createCustomAccount({
+      const data = await createAccountWithQr({
+        config,
         username: cleanUsername,
-        password_hash,
-        altcha_payload: altchaPayload,
+        altchaPayload,
+        create: (payload) => service.createCustomAccount(payload),
       });
-      setAccount({ email: data.email, dclogin_link, account_type: 'custom' });
+      setAccount({ email: data.email, dclogin_link: data.dclogin_link, account_type: 'custom' });
       setStep(2);
     } catch (err: unknown) {
       const errorObj = err as Error;
@@ -121,7 +96,7 @@ export function CustomWizard() {
     setAccount(null);
     setUsername('');
     setAltchaPayload(null);
-    setError(hashOk ? null : 'Unsupported hash algorithm');
+    setError(null);
     setCopied(false);
     setNotInstalled(false);
   };
@@ -134,7 +109,7 @@ export function CustomWizard() {
         <li className={`step ${step >= 2 ? 'step-primary' : ''}`}>{t('step_2_activate')}</li>
       </ul>
 
-      {error && <div className="alert alert-error text-xs py-2 rounded">{error}</div>}
+      {shownError && <div className="alert alert-error text-xs py-2 rounded">{shownError}</div>}
 
       <div className="flex-1 flex flex-col justify-center">
         {step === 1 && (
@@ -149,7 +124,7 @@ export function CustomWizard() {
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''));
-                    if (error && hashOk) setError(null);
+                    if (error && ready) setError(null);
                   }}
                   placeholder="yourname"
                   className="input input-bordered input-sm join-item flex-1 min-w-0 bg-base-100 text-start text-xs sm:text-sm"
@@ -163,20 +138,21 @@ export function CustomWizard() {
               </div>
             </div>
 
-            {/* Altcha Bot Protection */}
-            <div className="space-y-1 text-start">
-              <AltchaWidget
-                onVerified={(payload) => {
-                  setAltchaPayload(payload);
-                  if (error && hashOk) setError(null);
-                }}
-                autoVerify={true}
-              />
-            </div>
+            {needAltcha && (
+              <div className="space-y-1 text-start">
+                <AltchaWidget
+                  onVerified={(payload) => {
+                    setAltchaPayload(payload);
+                    if (error && ready) setError(null);
+                  }}
+                  autoVerify={true}
+                />
+              </div>
+            )}
 
             <button
               type="submit"
-              disabled={loading || !username.trim() || !altchaPayload || !hashOk}
+              disabled={loading || !username.trim() || !ready || (needAltcha && !altchaPayload)}
               className="btn btn-primary btn-sm w-full gap-2 shadow-sm"
             >
               {loading ? (

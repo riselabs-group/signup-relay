@@ -12,13 +12,23 @@ import type {
   WebxdcCatalog,
 } from './types.ts';
 
+// ponytail: one in-flight GET /config; drop cache if live admin edits must show without reload
+let configOnce: Promise<ServerConfig> | null = null;
+
 export const prodService: IService = {
-  getConfig: async (): Promise<ServerConfig> => {
-    const cfg = await request<ServerConfig>(API_ENDPOINTS.CONFIG, {}, SERVICE_CONFIG.API_BASE_URL);
-    if (cfg?.domain) {
-      SERVICE_CONFIG.DOMAIN = cfg.domain;
+  getConfig: (): Promise<ServerConfig> => {
+    if (!configOnce) {
+      configOnce = request<ServerConfig>(API_ENDPOINTS.CONFIG, {}, SERVICE_CONFIG.API_BASE_URL)
+        .then((cfg) => {
+          if (cfg?.domain) SERVICE_CONFIG.DOMAIN = cfg.domain;
+          return cfg;
+        })
+        .catch((err) => {
+          configOnce = null;
+          throw err;
+        });
     }
-    return cfg;
+    return configOnce;
   },
 
   getAltchaChallenge: (): Promise<AltchaChallenge> =>

@@ -48,6 +48,7 @@ export interface InstantAccountResult {
   account_id?: string;
   email: string;
   account_type: 'instant';
+  expires_at?: string;
 }
 
 export interface CustomAccountResult {

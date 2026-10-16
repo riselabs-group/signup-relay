@@ -63,8 +63,12 @@ export interface TranslationDictionary {
   app_add_to_chat: string;
   app_close: string;
   validation_username_format: string;
+  validation_username_dc_prefix: string;
+  validation_username_reserved: string;
   validation_password_min: string;
   error_create_account: string;
+  error_unsupported_hash: string;
+  error_endpoints_not_configured: string;
   hero_headline: string;
   hero_subheadline: string;
   hero_cta_create_account: string;
@@ -146,9 +150,13 @@ export const en: TranslationDictionary = {
   app_details: 'Details',
   app_add_to_chat: 'Add to Chat',
   app_close: 'Close',
-  validation_username_format: 'Username must be 3-32 characters, starting and ending with alphanumeric characters',
+  validation_username_format: 'Username must be 3–32 characters: letters, digits, dot, underscore, or hyphen',
+  validation_username_dc_prefix: 'Usernames starting with dc_ are reserved for instant accounts',
+  validation_username_reserved: 'This username is reserved',
   validation_password_min: 'Password must be at least 8 characters',
   error_create_account: 'Failed to create account',
+  error_unsupported_hash: 'Unsupported hash algorithm',
+  error_endpoints_not_configured: 'Mail endpoints are not configured',
   hero_headline: 'Your Address, Your Space.',
   hero_subheadline: 'A distinctive, secure, and decentralized platform for all your communication needs.',
   hero_cta_create_account: 'Create Account Now',
