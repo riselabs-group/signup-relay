@@ -1,22 +1,22 @@
-# Architecture & Technical Design Specification: Chatchi (DeltaChat & Stalwart Onboarding Portal)
+# Architecture & Technical Design Specification: MailiaM (DeltaChat & Stalwart Onboarding Portal)
 
 - **Date:** 2026-10-11
 - **Status:** Approved for Implementation
-- **Target Subsystem:** `frontend/` (React + Tailwind CSS + DaisyUI), `docs/`, and Backend API Specification for Stalwart Fork ("Chatchi")
+- **Target Subsystem:** `frontend/` (React + Tailwind CSS + DaisyUI), `docs/`, and Backend API Specification for Stalwart Fork ("MailiaM")
 - **Reference Codebases:** `../dc.tabarestangnu.ir` & `../delta.sudoshz.ir`
 
 ---
 
 ## 1. Executive Summary & Objectives
 
-The goal is to transform `signup-relay` into **Chatchi**, a mature, production-grade onboarding and documentation portal for the DeltaChat ecosystem backed by a custom Stalwart mail server fork ("Chatchi").
+The goal is to transform `signup-relay` into **MailiaM**, a mature, production-grade onboarding and documentation portal for the DeltaChat ecosystem backed by a custom Stalwart mail server fork ("MailiaM").
 
 ### Key Principles
 1. **Mature Real-World Design:** Built on Tailwind CSS + DaisyUI with restrained, high-contrast themes (`chatchi-dark` and `chatchi-light`). Strictly rejects low-contrast "AI-slop" (excessive neon glows, chaotic glassmorphism, jittery hover effects).
 2. **Instant "Fast-to-Account" Onboarding:** A pure 1-click client-side account generator providing instant DeltaChat connection via `dclogin:` QR code and deep-link schemes, complemented by a tabbed Custom Account wizard (username/password, Altcha Proof-of-Work, and step-by-step progress tracking).
 3. **Decoupled Service Strategy (Mock vs. Production):** Pluggable service layer driven by `AUTO_FALLBACK`, `FORCE_MOCK`, and `FORCE_PROD` modes that operate identically in both development and production environments.
 4. **Zero Layout Shifts (CLS = 0) & Anti-FOUT:** Strictly dimensioned media slots, locked multi-step wizard heights, CSS logical properties, and inline pre-DOM theme initializers to guarantee zero visual jumps.
-5. **Full WebXDC Store & Docs Hub:** Integrating mobile WebView deep-link navigation fixes from `dc.tabarestangnu.ir`, an interactive `/share` card generator, and a comprehensive multilingual (FA/EN) documentation suite covering Chatchi deployment, security, privacy, and free software philosophy.
+5. **Full WebXDC Store & Docs Hub:** Integrating mobile WebView deep-link navigation fixes from `dc.tabarestangnu.ir`, an interactive `/share` card generator, and a comprehensive multilingual (FA/EN) documentation suite covering MailiaM deployment, security, privacy, and free software philosophy.
 
 ---
 
@@ -26,7 +26,7 @@ The goal is to transform `signup-relay` into **Chatchi**, a mature, production-g
 signup-relay/
 ├── docs/
 │   ├── superpowers/specs/
-│   │   └── 2026-10-11-chatchi-portal-design.md    # This specification
+│   │   └── 2026-10-11-MailiaM-portal-design.md    # This specification
 │   ├── CHATCHI_BACKEND_API_SPEC.md                 # Stalwart fork API contract
 │   ├── DEPLOY_CHATCHI.md                           # Stalwart deployment guide
 │   ├── PRIVACY.md                                  # Privacy disclosure
@@ -42,7 +42,7 @@ signup-relay/
         ├── services/
         │   ├── types.js                            # Unified service contract (TypeScript / JSDoc)
         │   ├── config.js                           # SERVICE_MODE & API_BASE_URL resolution
-        │   ├── prodService.js                      # HTTP calls against Chatchi API
+        │   ├── prodService.js                      # HTTP calls against MailiaM API
         │   ├── mockService.js                      # Deterministic offline mock implementation
         │   └── index.js                            # Transparent Proxy with AUTO_FALLBACK
         ├── hooks/
@@ -215,7 +215,7 @@ function createServiceDispatcher() {
           if (error.status && error.status >= 400 && error.status < 500) {
             throw error;
           }
-          console.warn(`[Chatchi Service] Live API unavailable (${error.message}). Dispatching to Mock Service.`);
+          console.warn(`[MailiaM Service] Live API unavailable (${error.message}). Dispatching to Mock Service.`);
           return mockService[prop](...args);
         }
       };
@@ -341,9 +341,9 @@ export default {
 
 ---
 
-## 10. Chatchi Backend API Specification (`docs/CHATCHI_BACKEND_API_SPEC.md`)
+## 10. MailiaM Backend API Specification (`docs/CHATCHI_BACKEND_API_SPEC.md`)
 
-The backend for the custom Stalwart fork ("Chatchi") exposes the following RESTful API:
+The backend for the custom Stalwart fork ("MailiaM") exposes the following RESTful API:
 
 ### 10.1 Health & Discovery
 - **`GET /api/v1/health`**

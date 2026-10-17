@@ -11,7 +11,7 @@ export interface ShareCardProps {
 // ponytail: client-side SVG QR and Web Share API; upgrade to downloadable PNG or vCard export if contact interchange needed
 export function ShareCard({ embedded = false }: ShareCardProps = {}) {
   const { t } = useI18n();
-  const [name, setName] = useState<string>('ChatChi User');
+  const [name, setName] = useState<string>('MailiaM User');
   const [handle, setHandle] = useState<string>(`user@${getDomainName(API_DOMAIN)}`);
   const [copied, setCopied] = useState<boolean>(false);
 

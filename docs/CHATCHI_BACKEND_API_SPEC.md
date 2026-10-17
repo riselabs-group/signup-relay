@@ -1,6 +1,6 @@
-# Chatchi Backend API Specification
+# MailiaM Backend API Specification
 
-This document details the RESTful HTTP API expected from the custom Stalwart mail server fork ("Chatchi") to power the Chatchi DeltaChat onboarding portal and client applications.
+This document details the RESTful HTTP API expected from the custom Stalwart mail server fork ("MailiaM") to power the MailiaM DeltaChat onboarding portal and client applications.
 
 ## Base URL & Transport
 - **Base URL:** `/api/v1`

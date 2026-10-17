@@ -1,14 +1,14 @@
-# Chatchi Portal Implementation Plan
+# MailiaM Portal Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a mature, fast, and accessible DeltaChat onboarding and documentation portal (Chatchi) with DaisyUI + Tailwind CSS, 1-click QR account generation, custom mailbox wizard with Altcha, WebXDC app store, Share ID generator, and multilingual docs.
+**Goal:** Build a mature, fast, and accessible DeltaChat onboarding and documentation portal (MailiaM) with DaisyUI + Tailwind CSS, 1-click QR account generation, custom mailbox wizard with Altcha, WebXDC app store, Share ID generator, and multilingual docs.
 
-**Architecture:** Pure React with client-side routing, modular presentational components, container hooks, and a decoupled service layer implementing transparent `AUTO_FALLBACK` between live Chatchi API and offline mock modes.
+**Architecture:** Pure React with client-side routing, modular presentational components, container hooks, and a decoupled service layer implementing transparent `AUTO_FALLBACK` between live MailiaM API and offline mock modes.
 
 **Tech Stack:** React 19, Vite, Tailwind CSS 3, DaisyUI 4, Lucide React, Node.js test runner (`node:test`).
 
-**Spec:** `docs/superpowers/specs/2026-10-11-chatchi-portal-design.md`
+**Spec:** `docs/superpowers/specs/2026-10-11-MailiaM-portal-design.md`
 
 ## Global Constraints
 - Strictly avoid generic low-contrast "AI-slop" styling (no neon gradients, no excessive blurry glassmorphism, no shaky hover animations).
@@ -42,7 +42,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
-test('tailwind configuration exports chatchi themes', () => {
+test('tailwind configuration exports MailiaM themes', () => {
   const configPath = path.resolve(process.cwd(), 'frontend/tailwind.config.js');
   assert.ok(fs.existsSync(configPath), 'tailwind.config.js must exist');
   
@@ -160,7 +160,7 @@ Update `frontend/index.html` with anti-FOUT script and font preloads:
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="referrer" content="no-referrer" />
-    <title>Chatchi — DeltaChat Portal</title>
+    <title>MailiaM — DeltaChat Portal</title>
     <script>
       (function () {
         const key = 'chatchi_theme';
@@ -754,7 +754,7 @@ export const en = {
   nav_share: 'Share ID',
   nav_apps: 'WebXDC Apps',
   nav_docs: 'Docs',
-  index_title: 'Chatchi Relay & Chatmail',
+  index_title: 'MailiaM Relay & Chatmail',
   index_subtitle: 'Secure, decentralized communication for DeltaChat.',
   tab_instant: 'Instant Setup (1-Click)',
   tab_custom: 'Custom Account',
@@ -791,7 +791,7 @@ export const fa = {
   nav_share: 'کارت شناسه',
   nav_apps: 'برنامه‌های WebXDC',
   nav_docs: 'مستندات',
-  index_title: 'سرور دلتاچت چاتچی',
+  index_title: 'سرور دلتاچت MailiaM',
   index_subtitle: 'ارتباط امن، رمزنگاری‌شده و غیرمتمرکز برای دلتاچت.',
   tab_instant: 'ساخت فوری (۱ کلیک)',
   tab_custom: 'حساب سفارشی',
@@ -1259,7 +1259,7 @@ Create `frontend/src/components/share/ShareCard.jsx`:
 import React, { useState } from 'react';
 
 export function ShareCard() {
-  const [name, setName] = useState('Chatchi User');
+  const [name, setName] = useState('MailiaM User');
   const [handle, setHandle] = useState('user@chatchi.org');
   const [copied, setCopied] = useState(false);
 
@@ -1588,7 +1588,7 @@ git commit -m "feat(apps): implement webxdc app store with mobile webview same-w
 
 **Interfaces:**
 - Consumes: None
-- Produces: `<DocsRoute />` with zero-shift sticky navigation, deploy guide for Chatchi Stalwart fork, and AGPL-3.0 free software disclosures.
+- Produces: `<DocsRoute />` with zero-shift sticky navigation, deploy guide for MailiaM Stalwart fork, and AGPL-3.0 free software disclosures.
 
 - [ ] **Step 1: Write failing test verifying docs manifest**
 
@@ -1637,9 +1637,9 @@ Create `docs/PHILOSOPHY.md`:
 
 Create `docs/DEPLOY_CHATCHI.md`:
 ```markdown
-# راهنمای راه‌اندازی سرور چاتچی (Chatchi Stalwart Fork)
+# راهنمای راه‌اندازی سرور MailiaM (MailiaM Stalwart Fork)
 
-چاتچی یک فورک بهینه‌شده از سرور میل استال‌مارت (Stalwart) برای پاسخگویی به ثبت‌نام‌های دلتاچت است.
+MailiaM یک فورک بهینه‌شده از سرور میل استال‌مارت (Stalwart) برای پاسخگویی به ثبت‌نام‌های دلتاچت است.
 
 ## پیش‌نیازها
 - یک سرور لینوکس (دبیان یا ابونتو) با آی‌پی تمیز.
@@ -1678,7 +1678,7 @@ Create `frontend/src/routes/DocsRoute.jsx`:
 import React, { useState } from 'react';
 
 const DOC_TOPICS = [
-  { id: 'deploy', title: 'راه‌اندازی سرور چاتچی (Deploy)', content: 'راهنمای استقرار فورک اختصاصی Stalwart (Chatchi) بر روی سرور و تنظیم رکوردهای DNS برای دلتاچت.' },
+  { id: 'deploy', title: 'راه‌اندازی سرور MailiaM (Deploy)', content: 'راهنمای استقرار فورک اختصاصی Stalwart (MailiaM) بر روی سرور و تنظیم رکوردهای DNS برای دلتاچت.' },
   { id: 'security', title: 'امنیت و رمزنگاری (Security)', content: 'بررسی ارتباطات امن TLS 1.3، پروتکل Autocrypt و رمزنگاری سرتاسری OpenPGP در سرور.' },
   { id: 'privacy', title: 'حریم خصوصی (Privacy)', content: 'سیاست‌های عدم ذخیره‌سازی داده، عدم نگهداری لاگ‌های شخصی و استقلال از شرکت‌های تجاری.' },
   { id: 'philosophy', title: 'فلسفه نرم‌افزار آزاد (Philosophy)', content: 'آزادی‌های چهارگانه نرم‌افزار آزاد، جنبش آزادی کاربران، و چرایی استفاده از دلتاچت.' },
@@ -1691,7 +1691,7 @@ export function DocsRoute() {
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
       <aside className="w-full lg:w-64 flex-shrink-0 border border-base-300 rounded-lg bg-base-200 p-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/60 mb-3">مستندات چاتچی</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/60 mb-3">مستندات MailiaM</h3>
         <ul className="menu menu-sm p-0 gap-1">
           {DOC_TOPICS.map((doc) => (
             <li key={doc.id}>
@@ -1786,7 +1786,7 @@ export function Navbar({ currentRoute, onNavigate, onToggleTheme, currentTheme }
           <div className="w-8 h-8 rounded bg-primary text-primary-content font-bold flex items-center justify-center text-sm shadow">
             Δ
           </div>
-          <span className="font-bold text-base tracking-tight">Chatchi</span>
+          <span className="font-bold text-base tracking-tight">MailiaM</span>
           <span className="badge badge-xs badge-neutral">Relay</span>
         </div>
 
@@ -1958,5 +1958,5 @@ Expected: All tests PASS and Vite build completes with zero errors.
 
 ```bash
 git add frontend/src/components/layout/ frontend/src/App.jsx frontend/src/main.jsx frontend/tests/e2e.test.js
-git commit -m "feat: assemble complete chatchi shell, routing, layout and verify build"
+git commit -m "feat: assemble complete MailiaM shell, routing, layout and verify build"
 ```

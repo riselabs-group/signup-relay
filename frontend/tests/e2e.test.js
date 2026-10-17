@@ -34,7 +34,7 @@ test('Navbar component renders brand, routes, and toggles', () => {
   assert.ok(fs.existsSync(navbarPath), 'Navbar must exist');
   const content = fs.readFileSync(navbarPath, 'utf8');
   assert.match(content, /export function Navbar/);
-  assert.match(content, /app_title|ChatChi/);
+  assert.match(content, /app_title|MailiaM/);
   assert.ok(!content.includes('badge-neutral'), 'Must remove Relay badge');
   assert.match(content, /logo\.svg/, 'Must render logo image');
   assert.match(content, /nav_home/);

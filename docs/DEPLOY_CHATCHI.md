@@ -1,6 +1,6 @@
-# راهنمای راه‌اندازی سرور چاتچی (Chatchi Stalwart Fork)
+# راهنمای راه‌اندازی سرور MailiaM (MailiaM Stalwart Fork)
 
-چاتچی یک فورک بهینه‌شده از سرور میل استال‌مارت (Stalwart) برای پاسخگویی به ثبت‌نام‌های دلتاچت است.
+MailiaM یک فورک بهینه‌شده از سرور میل استال‌مارت (Stalwart) برای پاسخگویی به ثبت‌نام‌های دلتاچت است.
 
 ## پیش‌نیازها
 - یک سرور لینوکس (دبیان یا ابونتو) با آی‌پی تمیز.
@@ -22,7 +22,7 @@
 version: '3.8'
 
 services:
-  chatchi:
+  MailiaM:
     image: stalwartlabs/mail-server:latest
     container_name: chatchi-stalwart
     restart: unless-stopped

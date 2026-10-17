@@ -55,9 +55,9 @@ The source code of this project is released under **GNU AGPL-3.0-or-later**.`,
   },
   {
     id: 'deploy',
-    title_fa: 'راه‌اندازی سرور چت‌چی (Deploy)',
-    title_en: 'Deploying ChatChi Server',
-    content_fa: `چت‌چی یک فورک بهینه‌شده از سرور میل استال‌مارت (Stalwart) برای پاسخگویی به ثبت‌نام‌های دلتاچت است.
+    title_fa: 'راه‌اندازی سرور MailiaM (Deploy)',
+    title_en: 'Deploying MailiaM Server',
+    content_fa: `MailiaM یک فورک بهینه‌شده از سرور میل استال‌مارت (Stalwart) برای پاسخگویی به ثبت‌نام‌های دلتاچت است.
 
 ## پیش‌نیازها
 - یک سرور لینوکس (دبیان یا ابونتو) با آی‌پی تمیز.
@@ -75,7 +75,7 @@ The source code of this project is released under **GNU AGPL-3.0-or-later**.`,
 \`\`\`bash
 docker compose -f docker-compose.yml up -d
 \`\`\``,
-    content_en: `ChatChi is an optimized Stalwart mail server fork tailored for instant DeltaChat account registration.
+    content_en: `MailiaM is an optimized Stalwart mail server fork tailored for instant DeltaChat account registration.
 
 ## Prerequisites
 - A Linux server (Debian/Ubuntu) with clean IP reputation.
@@ -121,13 +121,13 @@ PGP private keys remain strictly on the user's device and are never transmitted 
     id: 'privacy',
     title_fa: 'حریم خصوصی (Privacy)',
     title_en: 'Privacy Policy',
-    content_fa: `سیاست‌های حفظ حریم خصوصی کاربران چت‌چی:
+    content_fa: `سیاست‌های حفظ حریم خصوصی کاربران MailiaM:
 
 - **بدون لاگ‌برداری:** آدرس آی‌پی، مکالمات و فراداده‌ها ذخیره نمی‌شوند.
 - **بدون ردیابی:** از هیچ سرویس تحلیلگر شخص ثالث یا اسکریپت ردیابی استفاده نمی‌شود.
 - **حذف خودکار:** حساب‌های موقت در صورت عدم استفاده پس از ۳۰ روز منقضی می‌شوند.
 - **عدم نگهداری پیام‌ها:** سرور هیچ بایگانی از پیام‌های کاربران ذخیره نمی‌کند.`,
-    content_en: `ChatChi privacy commitments:
+    content_en: `MailiaM privacy commitments:
 
 - **Zero Logs:** IP addresses, chat messages, and metadata are never logged or stored.
 - **Zero Tracking:** No third-party analytics or tracker scripts.
