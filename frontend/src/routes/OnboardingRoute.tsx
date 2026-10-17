@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ShieldCheck, Globe, Zap, Sparkles, UserPlus, Video, HardDrive, Layers } from 'lucide-react';
 import { useI18n } from '../i18n/index.tsx';
 import { service } from '../services/index.ts';
+import type { ServerConfig } from '../services/types.ts';
 import { InstantQrCard } from '../components/onboarding/InstantQrCard.tsx';
 import { CustomWizard } from '../components/onboarding/CustomWizard.tsx';
 
@@ -12,16 +13,21 @@ export function OnboardingRoute() {
   const { t } = useI18n();
   const [tab, setTab] = useState<OnboardingTab>('instant');
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [config, setConfig] = useState<ServerConfig | null>(null);
 
   useEffect(() => {
-    service
-      .getConfig()
+    let mounted = true;
+    service.getConfig()
       .then((cfg) => {
+        if (!mounted) return;
+        setConfig(cfg);
         setIsOnline(Boolean(cfg?.registration_open));
       })
       .catch(() => {
+        if (!mounted) return;
         setIsOnline(false);
       });
+    return () => { mounted = false; };
   }, []);
 
   const scrollToSetup = () => {
@@ -156,7 +162,7 @@ export function OnboardingRoute() {
             </div>
 
             <div className="min-h-[380px]">
-              {tab === 'instant' ? <InstantQrCard /> : <CustomWizard />}
+              {tab === 'instant' ? <InstantQrCard config={config} /> : <CustomWizard config={config} />}
             </div>
           </div>
         </div>

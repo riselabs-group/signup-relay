@@ -8,7 +8,7 @@ import { solveAltcha, sha256Hex } from '../src/utils/altcha.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(__dirname, '..');
-const findFile = (base, name) => {
+const findFile = (base: string, name: string) => {
   const tsx = path.resolve(base, `${name}.tsx`);
   const jsx = path.resolve(base, `${name}.jsx`);
   return fs.existsSync(tsx) ? tsx : jsx;
@@ -20,7 +20,12 @@ test('instant account pipeline executes synchronously without network', () => {
     email: creds.email,
     password: creds.password,
     imapHost: 'mail.chatchi.org',
+    imapPort: 993,
+    imapSecurity: 'ssl',
     smtpHost: 'mail.chatchi.org',
+    smtpPort: 465,
+    smtpSecurity: 'ssl',
+    certificateChecks: '1',
   });
 
   assert.ok(uri.startsWith('dclogin:'));
@@ -84,8 +89,14 @@ test('InstantQrCard component file enforces zero-CLS locked dimensions and bdi i
   assert.match(content, /openDeltaChatUri/, 'Must invoke openDeltaChatUri on open action');
   assert.match(content, /index_dc_not_installed/, 'Must display fallback alert when not installed');
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText with catch');
-  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget');
+  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget when altcha.required');
+  assert.match(content, /needAltcha/, 'Must gate Altcha on config.altcha.required');
   assert.match(content, /service\.createInstantAccount/, 'Must call service.createInstantAccount');
+  assert.match(content, /createAccountWithQr/);
+  assert.match(content, /apiErrorKey/);
+  assert.match(content, /generateInstantUsername\(config\)/, 'Must pass config to generateInstantUsername');
+  assert.doesNotMatch(content, /service\.getConfig/);
+  assert.doesNotMatch(content, /result\.dclogin_link/);
 });
 
 test('AltchaWidget component exists and handles verification challenge', () => {
@@ -111,16 +122,26 @@ test('CustomWizard component enforces 2-step wizard, locked height, AltchaWidget
   assert.match(content, /steps\s+steps-horizontal/, 'Must render DaisyUI steps');
   assert.match(content, /step_1_personalize/, 'Must render Step 1 Personalization');
   assert.match(content, /step_2_activate/, 'Must render Step 2 Activation');
-  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget in step 1');
+  assert.match(content, /AltchaWidget/, 'Must embed AltchaWidget in step 1 when required');
+  assert.match(content, /needAltcha/, 'Must gate Altcha on config.altcha.required');
   assert.match(content, /service\.createCustomAccount/, 'Must call service.createCustomAccount');
-  assert.match(content, /generateRandomString\(24\)/, 'Must auto-generate strong random password in client');
-  assert.match(content, /generateQrSvgDataUri\(result\.dclogin_link,\s*200\)/, 'Must render in-memory QR code for completed custom account');
+  assert.match(content, /createAccountWithQr/);
+  assert.match(content, /apiErrorKey/);
+  assert.match(content, /validateCustomUsername/);
+  assert.match(content, /generateQrSvgDataUri\(account\.dclogin_link,\s*200\)/, 'Must render in-memory QR code for completed custom account');
   assert.match(content, /openDeltaChatUri/, 'Must provide openDeltaChatUri action on custom completion');
   assert.match(content, /ManualInstructions/, 'Must render ManualInstructions on custom completion');
   assert.match(content, /navigator\.clipboard\.writeText\([^)]+\)\.catch/, 'Must guard clipboard writeText on custom completion');
-  assert.match(content, /service\.getConfig/, 'Must fetch config to populate server domain');
+  assert.doesNotMatch(content, /service\.getConfig/);
+  assert.match(content, /dir=["']ltr["']/, 'Must pin username+domain join to LTR');
+  assert.match(content, /validateCustomPassword/);
+  assert.match(content, /wizard_password_optional/);
+  assert.match(content, /EyeOff/);
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@\{(?:domain|SERVICE_CONFIG\.DOMAIN)\}<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
-  assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{result\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
+  assert.match(content, /hasCustomPrefix/, 'Must support dynamic custom prefix badge');
+  assert.match(content, /custom_accounts_enabled/, 'Must gate on custom_accounts_enabled');
+  assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{account\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
+  assert.doesNotMatch(content, /result\.dclogin_link/);
 });
 
 test('OnboardingRoute component renders hero with CTA, feature cards, and bottom account setup with online/offline badge', () => {
@@ -141,6 +162,7 @@ test('OnboardingRoute component renders hero with CTA, feature cards, and bottom
   assert.match(content, /role=["']tablist["']/, 'Must render tab list with role="tablist"');
   assert.match(content, /tabs-boxed/, 'Must use DaisyUI tabs-boxed styling');
   assert.match(content, /min-h-\[380px\]/, 'Must enforce locked tab body container height (min-h-[380px])');
-  assert.match(content, /<InstantQrCard\s*\/>/, 'Must render InstantQrCard');
-  assert.match(content, /<CustomWizard\s*\/>/, 'Must render CustomWizard');
+  assert.match(content, /service\.getConfig/, 'Must fetch config once at the route');
+  assert.match(content, /<InstantQrCard\s+config=\{config\}/, 'Must pass config into InstantQrCard');
+  assert.match(content, /<CustomWizard\s+config=\{config\}/, 'Must pass config into CustomWizard');
 });

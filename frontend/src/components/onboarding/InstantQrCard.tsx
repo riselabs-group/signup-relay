@@ -1,16 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
 import { useI18n } from '../../i18n/index.tsx';
 import { service } from '../../services/index.ts';
-import type { InstantAccountResult } from '../../services/types.ts';
-import { openDeltaChatUri } from '../../utils/dclogin.ts';
+import type { ServerConfig } from '../../services/types.ts';
+import { generateInstantUsername, openDeltaChatUri } from '../../utils/dclogin.ts';
+import { altchaRequired, apiErrorKey, canSignup, createAccountWithQr, signupErrorKey } from '../../utils/account.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
 
-export type InstantAccountState = InstantAccountResult;
+type InstantAccountState = {
+  email: string;
+  dclogin_link: string;
+  account_type: 'instant';
+};
+
+function blockMsg(config: ServerConfig | null, t: (k: string) => string): string | null {
+  if (!config) return null;
+  const key = signupErrorKey(config, config.instant_accounts_enabled !== false);
+  return key ? t(key) : null;
+}
 
 // ponytail: in-memory state for ephemeral QR; upgrade to persistent local storage if tab-recovery needed
-export function InstantQrCard() {
+export function InstantQrCard({ config }: { config: ServerConfig | null }) {
   const { t } = useI18n();
   const [account, setAccount] = useState<InstantAccountState | null>(null);
   const [altchaPayload, setAltchaPayload] = useState<string | null>(null);
@@ -19,24 +30,28 @@ export function InstantQrCard() {
   const [copied, setCopied] = useState<boolean>(false);
   const [notInstalled, setNotInstalled] = useState<boolean>(false);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const ready = !!config && canSignup(config) && config.instant_accounts_enabled !== false;
+  const needAltcha = !!config && altchaRequired(config);
+  const shownError = error || blockMsg(config, t);
 
-  useEffect(() => {
-    return () => {
-      cleanupRef.current?.();
-    };
-  }, []);
+  useEffect(() => () => { cleanupRef.current?.(); }, []);
 
   const handleGenerate = async () => {
-    if (!altchaPayload) return;
+    if (!config || !ready) return;
+    if (needAltcha && !altchaPayload) return;
     setLoading(true);
     setError(null);
     setNotInstalled(false);
     try {
-      const data = await service.createInstantAccount({ altcha_payload: altchaPayload });
-      setAccount(data);
+      const data = await createAccountWithQr({
+        config,
+        username: generateInstantUsername(config),
+        altchaPayload,
+        create: (payload) => service.createInstantAccount(payload),
+      });
+      setAccount({ email: data.email, dclogin_link: data.dclogin_link, account_type: 'instant' });
     } catch (err: unknown) {
-      const errorObj = err as Error;
-      setError(errorObj.message || t('error_create_account'));
+      setError(t(apiErrorKey(err)));
     } finally {
       setLoading(false);
     }
@@ -69,20 +84,22 @@ export function InstantQrCard() {
     <div className="flex flex-col items-center text-center space-y-4">
       {!account ? (
         <div className="w-full max-w-xs space-y-3 py-6">
-          {error && <div className="alert alert-error text-xs py-2 rounded text-start">{error}</div>}
+          {shownError && <div className="alert alert-error text-xs py-2 rounded text-start">{shownError}</div>}
 
-          <AltchaWidget
-            onVerified={(payload) => {
-              setAltchaPayload(payload);
-              if (error) setError(null);
-            }}
-            autoVerify={true}
-          />
+          {needAltcha && (
+            <AltchaWidget
+              onVerified={(payload) => {
+                setAltchaPayload(payload);
+                if (error && ready) setError(null);
+              }}
+              autoVerify={true}
+            />
+          )}
 
           <button
             type="button"
             onClick={handleGenerate}
-            disabled={loading || !altchaPayload}
+            disabled={loading || !ready || (needAltcha && !altchaPayload)}
             className="btn btn-primary btn-md w-full shadow"
           >
             {loading ? <span className="loading loading-spinner loading-sm" /> : t('index_generate')}

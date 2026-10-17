@@ -1,94 +1,120 @@
 import { useState, useRef, useEffect } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useI18n } from '../../i18n/index.tsx';
 import { service } from '../../services/index.ts';
 import { SERVICE_CONFIG } from '../../services/config.ts';
+import type { ServerConfig } from '../../services/types.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
-import { generateRandomString, openDeltaChatUri } from '../../utils/dclogin.ts';
+import { openDeltaChatUri } from '../../utils/dclogin.ts';
+import { altchaRequired, apiErrorKey, canSignup, createAccountWithQr, signupErrorKey, validateCustomPassword, validateCustomUsername } from '../../utils/account.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
-import type { CustomAccountResult } from '../../services/types.ts';
+
+type CustomAccountState = {
+  email: string;
+  dclogin_link: string;
+  account_type: 'custom';
+};
+
+function blockMsg(config: ServerConfig | null, t: (k: string) => string): string | null {
+  if (!config) return null;
+  const key = signupErrorKey(config, config.custom_accounts_enabled !== false, 'custom');
+  return key ? t(key) : null;
+}
+
+function usernameErrorKey(code: ReturnType<typeof validateCustomUsername>): string | null {
+  if (code === 'ok') return null;
+  if (code === 'dc_prefix') return 'validation_username_dc_prefix';
+  if (code === 'reserved') return 'validation_username_reserved';
+  if (code === 'length') return 'validation_username_length';
+  if (code === 'dots') return 'validation_username_dots';
+  return 'validation_username_chars';
+}
+
+function passwordErrorKey(code: ReturnType<typeof validateCustomPassword>): string | null {
+  if (code === 'ok') return null;
+  return `validation_password_${code}`;
+}
 
 // ponytail: 2-step custom onboarding (personalize -> activate) with client Altcha PoW; upgrade to multi-factor if email recovery requested
-export function CustomWizard() {
+export function CustomWizard({ config }: { config: ServerConfig | null }) {
   const { t } = useI18n();
   const [step, setStep] = useState<number>(1);
   const [username, setUsername] = useState<string>('');
-  const [domain, setDomain] = useState<string>(SERVICE_CONFIG.DOMAIN);
+  const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [altchaPayload, setAltchaPayload] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<CustomAccountResult | null>(null);
+  const [account, setAccount] = useState<CustomAccountState | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const [notInstalled, setNotInstalled] = useState<boolean>(false);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const ready = !!config && canSignup(config) && config.custom_accounts_enabled !== false;
+  const needAltcha = !!config && altchaRequired(config);
+  const domain = config?.domain || SERVICE_CONFIG.DOMAIN;
+  const hasCustomPrefix = Boolean(config?.custom_prefix_enabled && config.custom_prefix);
+  const customPrefix = hasCustomPrefix ? (config?.custom_prefix ?? '') : '';
+  const shownError = error || blockMsg(config, t);
 
-  useEffect(() => {
-    let mounted = true;
-    service.getConfig()
-      .then((cfg) => {
-        if (mounted && cfg?.domain) {
-          setDomain(cfg.domain);
-        }
-      })
-      .catch(() => {});
-
-    return () => {
-      cleanupRef.current?.();
-      mounted = false;
-    };
-  }, []);
+  useEffect(() => () => { cleanupRef.current?.(); }, []);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e && e.preventDefault) e.preventDefault();
+    if (!config || !ready) return;
 
-    const usernameRegex = /^[a-z0-9][a-z0-9._-]{1,30}[a-z0-9]$/i;
-    const cleanUsername = username.trim();
-    if (!usernameRegex.test(cleanUsername)) {
-      return setError(t('validation_username_format'));
+    const cleanSuffix = username.trim();
+    if (!cleanSuffix) return setError(t('validation_username_length'));
+    const fullUsername = `${customPrefix}${cleanSuffix}`;
+    const usernameErr = usernameErrorKey(validateCustomUsername(fullUsername, config));
+    if (usernameErr) return setError(t(usernameErr));
+    if (password) {
+      const pwErr = passwordErrorKey(validateCustomPassword(password, fullUsername));
+      if (pwErr) return setError(t(pwErr));
     }
-    if (!altchaPayload) {
-      return setError(t('altcha_verifying'));
-    }
+    if (needAltcha && !altchaPayload) return setError(t('altcha_verifying'));
 
     setError(null);
     setLoading(true);
 
     try {
-      const generatedPassword = generateRandomString(24);
-      const data = await service.createCustomAccount({
-        username: cleanUsername,
-        password: generatedPassword,
-        altcha_payload: altchaPayload,
+      const data = await createAccountWithQr({
+        config,
+        username: fullUsername,
+        password: password || undefined,
+        altchaPayload,
+        create: (payload) => service.createCustomAccount(payload),
       });
-      setResult(data);
+      setAccount({ email: data.email, dclogin_link: data.dclogin_link, account_type: 'custom' });
       setStep(2);
     } catch (err: unknown) {
-      const errorObj = err as Error;
-      setError(errorObj.message || t('error_create_account'));
+      setError(t(apiErrorKey(err)));
     } finally {
       setLoading(false);
     }
   };
 
   const handleCopy = () => {
-    if (!result || !result.dclogin_link) return;
+    if (!account) return;
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(result.dclogin_link).catch(() => {});
+      navigator.clipboard.writeText(account.dclogin_link).catch(() => {});
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleOpenApp = () => {
-    if (!result || !result.dclogin_link) return;
+    if (!account) return;
     cleanupRef.current?.();
-    cleanupRef.current = openDeltaChatUri(result.dclogin_link, () => setNotInstalled(true));
+    cleanupRef.current = openDeltaChatUri(account.dclogin_link, () => setNotInstalled(true));
   };
 
   const handleReset = () => {
     setStep(1);
-    setResult(null);
+    setAccount(null);
     setUsername('');
+    setPassword('');
+    setShowPassword(false);
     setAltchaPayload(null);
     setError(null);
     setCopied(false);
@@ -103,7 +129,7 @@ export function CustomWizard() {
         <li className={`step ${step >= 2 ? 'step-primary' : ''}`}>{t('step_2_activate')}</li>
       </ul>
 
-      {error && <div className="alert alert-error text-xs py-2 rounded">{error}</div>}
+      {shownError && <div className="alert alert-error text-xs py-2 rounded">{shownError}</div>}
 
       <div className="flex-1 flex flex-col justify-center">
         {step === 1 && (
@@ -112,13 +138,18 @@ export function CustomWizard() {
               <label className="label py-1 text-xs font-semibold text-base-content/80">
                 <span>{t('wizard_username_label')}</span>
               </label>
-              <div className="join w-full">
+              <div className="join w-full" dir="ltr">
+                {hasCustomPrefix && (
+                  <span className="join-item px-2.5 sm:px-3 text-xs bg-base-300/60 text-base-content/70 border border-base-300 flex items-center justify-center shrink-0 select-none">
+                    <bdi dir="ltr">{customPrefix}</bdi>
+                  </span>
+                )}
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''));
-                    if (error) setError(null);
+                    if (error && ready) setError(null);
                   }}
                   placeholder="yourname"
                   className="input input-bordered input-sm join-item flex-1 min-w-0 bg-base-100 text-start text-xs sm:text-sm"
@@ -132,20 +163,49 @@ export function CustomWizard() {
               </div>
             </div>
 
-            {/* Altcha Bot Protection */}
-            <div className="space-y-1 text-start">
-              <AltchaWidget
-                onVerified={(payload) => {
-                  setAltchaPayload(payload);
-                  if (error) setError(null);
-                }}
-                autoVerify={true}
-              />
+            <div className="form-control gap-1.5 text-start">
+              <label className="label py-1 text-xs font-semibold text-base-content/80">
+                <span>{t('wizard_password_label')}</span>
+              </label>
+              <div className="join w-full" dir="ltr">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error && ready) setError(null);
+                  }}
+                  placeholder={t('wizard_password_optional')}
+                  className="input input-bordered input-sm join-item flex-1 min-w-0 bg-base-100 text-start text-xs sm:text-sm"
+                  dir="ltr"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="btn btn-sm join-item btn-square"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? t('wizard_password_hide') : t('wizard_password_show')}
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
             </div>
+
+            {needAltcha && (
+              <div className="space-y-1 text-start">
+                <AltchaWidget
+                  onVerified={(payload) => {
+                    setAltchaPayload(payload);
+                    if (error && ready) setError(null);
+                  }}
+                  autoVerify={true}
+                />
+              </div>
+            )}
 
             <button
               type="submit"
-              disabled={loading || !username.trim() || !altchaPayload}
+              disabled={loading || !username.trim() || !ready || (needAltcha && !altchaPayload)}
               className="btn btn-primary btn-sm w-full gap-2 shadow-sm"
             >
               {loading ? (
@@ -157,42 +217,38 @@ export function CustomWizard() {
           </form>
         )}
 
-        {step === 2 && result && (
+        {step === 2 && account && (
           <div className="text-center space-y-4 py-2">
             <div className="badge badge-success text-white py-3 px-4 text-xs font-semibold">
               {t('wizard_success_badge')}
             </div>
 
-            {result.dclogin_link && (
-              <div className="w-56 h-56 mx-auto bg-white p-3 rounded-xl border border-base-300 flex items-center justify-center shadow-inner">
-                <img
-                  src={generateQrSvgDataUri(result.dclogin_link, 200)}
-                  alt="DeltaChat Login QR"
-                  width="200"
-                  height="200"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            )}
+            <div className="w-56 h-56 mx-auto bg-white p-3 rounded-xl border border-base-300 flex items-center justify-center shadow-inner">
+              <img
+                src={generateQrSvgDataUri(account.dclogin_link, 200)}
+                alt="DeltaChat Login QR"
+                width="200"
+                height="200"
+                className="w-full h-full object-contain"
+              />
+            </div>
 
             <p className="text-xs text-base-content/70">
-              <span className="font-semibold"><bdi dir="ltr">{result.email}</bdi></span>
+              <span className="font-semibold"><bdi dir="ltr">{account.email}</bdi></span>
             </p>
 
-            {result.dclogin_link && (
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <button type="button" onClick={handleOpenApp} className="btn btn-primary btn-sm">
-                  {t('index_open_dc')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className={`btn btn-sm ${copied ? 'btn-success text-white' : 'btn-outline'}`}
-                >
-                  {copied ? t('index_copied') : t('index_copy_link')}
-                </button>
-              </div>
-            )}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button type="button" onClick={handleOpenApp} className="btn btn-primary btn-sm">
+                {t('index_open_dc')}
+              </button>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className={`btn btn-sm ${copied ? 'btn-success text-white' : 'btn-outline'}`}
+              >
+                {copied ? t('index_copied') : t('index_copy_link')}
+              </button>
+            </div>
 
             {notInstalled && (
               <div className="alert alert-warning text-xs py-2 rounded">
@@ -200,7 +256,7 @@ export function CustomWizard() {
               </div>
             )}
 
-            {result.dclogin_link && <ManualInstructions dcloginLink={result.dclogin_link} />}
+            <ManualInstructions dcloginLink={account.dclogin_link} />
 
             <div className="pt-2 border-t border-base-300">
               <button

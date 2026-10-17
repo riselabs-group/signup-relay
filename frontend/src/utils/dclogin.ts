@@ -1,4 +1,5 @@
 import { API_DOMAIN } from '../api/registry.ts';
+import type { ServerConfig } from '../services/types.ts';
 
 export interface RandomCredentials {
   username: string;
@@ -38,26 +39,27 @@ export function generateRandomCredentials(domain: string = getDomainName(API_DOM
 export interface DcloginUriOptions {
   email: string;
   password: string;
-  imapHost?: string;
-  imapPort?: number;
-  imapSecurity?: string;
-  smtpHost?: string;
-  smtpPort?: number;
-  smtpSecurity?: string;
+  imapHost: string;
+  imapPort: number;
+  imapSecurity: string;
+  smtpHost: string;
+  smtpPort: number;
+  smtpSecurity: string;
+  certificateChecks: string;
 }
 
-export function buildDcloginUri(options: DcloginUriOptions = {} as DcloginUriOptions): string {
-  const emailDomain = options?.email?.split('@')[1] || getDomainName(API_DOMAIN);
+export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): string {
   const {
     email,
     password,
-    imapHost = `mail.${emailDomain}`,
-    imapPort = 993,
-    imapSecurity = 'ssl',
-    smtpHost = `mail.${emailDomain}`,
-    smtpPort = 465,
-    smtpSecurity = 'ssl',
-  } = options || ({} as DcloginUriOptions);
+    imapHost,
+    imapPort,
+    imapSecurity,
+    smtpHost,
+    smtpPort,
+    smtpSecurity,
+    certificateChecks,
+  } = options;
 
   if (!email || !password) {
     throw new Error('Email and password are required to build dclogin URI');
@@ -65,6 +67,18 @@ export function buildDcloginUri(options: DcloginUriOptions = {} as DcloginUriOpt
 
   if (email.includes('#') || email.includes('?')) {
     throw new Error('Email contains invalid URI characters');
+  }
+
+  if (
+    !imapHost ||
+    imapPort === undefined ||
+    !imapSecurity ||
+    !smtpHost ||
+    smtpPort === undefined ||
+    !smtpSecurity ||
+    !certificateChecks
+  ) {
+    throw new Error('DCLogin endpoints are required');
   }
 
   const query = [
@@ -76,10 +90,18 @@ export function buildDcloginUri(options: DcloginUriOptions = {} as DcloginUriOpt
     `sh=${encodeURIComponent(smtpHost)}`,
     `sp=${smtpPort}`,
     `ss=${encodeURIComponent(smtpSecurity)}`,
-    'ic=3',
+    `ic=${encodeURIComponent(certificateChecks)}`,
   ].join('&');
 
   return `dclogin:${email}/?${query}`;
+}
+
+export function generateInstantUsername(config?: Partial<ServerConfig> | null): string {
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+  const prefix = config?.instant_prefix_enabled === false ? '' : (config?.instant_prefix ?? 'dc_');
+  return `${prefix}${hex}`;
 }
 
 export function openDeltaChatUri(
