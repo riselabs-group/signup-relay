@@ -141,7 +141,7 @@ export const en: TranslationDictionary = {
   btn_submit: 'Create Custom Mailbox',
   footer_fs_statement: 'This is a server for communication with DeltaChat.',
   footer_powered_by: 'Powered by MailiaM for use with DeltaChat.',
-  footer_version: 'Version 2.2.44',
+  footer_version: 'Version 2.2.49',
   apps_title: 'WebXDC App Store',
   apps_subtitle: 'Independent mini-apps to run inside DeltaChat chats',
   apps_security_title: 'WebXDC Apps Security Notice',
