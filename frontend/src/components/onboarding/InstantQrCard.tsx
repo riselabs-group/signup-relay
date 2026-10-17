@@ -45,7 +45,7 @@ export function InstantQrCard({ config }: { config: ServerConfig | null }) {
     try {
       const data = await createAccountWithQr({
         config,
-        username: generateInstantUsername(),
+        username: generateInstantUsername(config),
         altchaPayload,
         create: (payload) => service.createInstantAccount(payload),
       });

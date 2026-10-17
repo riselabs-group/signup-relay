@@ -28,6 +28,11 @@ Config shape (fields you must use):
   "domain": "example.org",
   "registration_open": true,
   "instant_accounts_enabled": true,
+  "custom_accounts_enabled": true,
+  "instant_prefix_enabled": true,
+  "instant_prefix": "dc_",
+  "custom_prefix_enabled": false,
+  "custom_prefix": "",
   "password_hash_algorithm": "argon2id",
   "certificate_checks": "1",
   "endpoints": {
@@ -53,8 +58,8 @@ Rules:
 - Hash in the browser with `config.password_hash_algorithm` (`argon2id` \| `bcrypt` \| `scrypt` \| `pbkdf2`). No silent fallback.
 - Never POST plaintext `password`.
 - Never read `dclogin_link` from the server. It is not returned.
-- Instant username: `dc_` + 12 hex.
-- Custom username: 3–32 `[a-z0-9._-]`, no `dc_`, no reserved names (`admin`, `postmaster`, …), no leading/trailing/consecutive dots. Server re-checks.
+- Instant username: prefix with `config.instant_prefix` (default `dc_`) + 12 hex if `config.instant_prefix_enabled !== false`; if `config.instant_prefix_enabled` is false, generate 12 hex with no prefix.
+- Custom username: 3–32 `[a-z0-9._-]`, no reserved names (`admin`, `postmaster`, …), no leading/trailing/consecutive dots. If `config.custom_prefix_enabled` is true, the mandatory `custom_prefix` is pinned on the left as a fixed uneditable badge. If `config.custom_prefix_enabled` is false and `config.instant_prefix_enabled !== false`, custom usernames cannot start with `config.instant_prefix` (default `dc_`). Server re-checks.
 - Custom password is optional. Empty → generate 24 random `[a-z0-9]` in RAM. If set: ≥12 chars, upper + lower + digit + one of `-_.`, only `[A-Za-z0-9._-]`, not equal to username. Client-only; server still only rejects plaintext and checks the hash prefix. Hash it; never POST `password`. Username+domain UI stays LTR (`dir="ltr"` on the join) in every locale.
 
 2xx body you need: `{ "email": "alice@example.org", "account_type": "instant"|"custom" }`. Use `email` as the QR identity.

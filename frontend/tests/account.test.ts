@@ -30,16 +30,35 @@ function cfg(over: Partial<ServerConfig> = {}): ServerConfig {
   };
 }
 
-test('generateInstantUsername is dc_ plus 12 hex', () => {
+test('generateInstantUsername is dc_ plus 12 hex by default and honors prefix config', () => {
   const u = generateInstantUsername();
   assert.match(u, /^dc_[0-9a-f]{12}$/);
   assert.equal(u.length, 15);
+
+  const customPref = generateInstantUsername({ instant_prefix_enabled: true, instant_prefix: 'ch_' });
+  assert.match(customPref, /^ch_[0-9a-f]{12}$/);
+  assert.equal(customPref.length, 15);
+
+  const noPref = generateInstantUsername({ instant_prefix_enabled: false });
+  assert.match(noPref, /^[0-9a-f]{12}$/);
+  assert.equal(noPref.length, 12);
 });
 
 test('validateCustomUsername accepts 3-32 [a-z0-9._-] without dc_ or reserved', () => {
   assert.equal(validateCustomUsername('abc'), 'ok');
   assert.equal(validateCustomUsername('user.name-1_x'), 'ok');
   assert.equal(validateCustomUsername('a'.repeat(32)), 'ok');
+});
+
+test('validateCustomUsername respects dynamic instant and custom prefix policies', () => {
+  // Disabling instant prefix allows dc_ in custom username
+  assert.equal(validateCustomUsername('dc_alice', { instant_prefix_enabled: false }), 'ok');
+
+  // Custom instant prefix is forbidden
+  assert.equal(validateCustomUsername('bot_alice', { instant_prefix: 'bot_' }), 'dc_prefix');
+
+  // When custom prefix is enabled, instant prefix check is bypassed
+  assert.equal(validateCustomUsername('usr_dc_alice', { custom_prefix_enabled: true, custom_prefix: 'usr_' }), 'ok');
 });
 
 test('validateCustomPassword requires 12 chars, mixed case, digit, and -_.', () => {
@@ -93,6 +112,7 @@ test('canSignup is false for unsupported algorithm or empty mail hosts', () => {
   assert.equal(signupErrorKey(cfg({ password_hash_algorithm: 'md5' })), 'error_unsupported_hash');
   assert.equal(signupErrorKey(cfg({ registration_open: false })), 'error_registration_closed');
   assert.equal(signupErrorKey(cfg(), false), 'error_instant_accounts_disabled');
+  assert.equal(signupErrorKey(cfg({ custom_accounts_enabled: false }), false, 'custom'), 'error_custom_accounts_disabled');
 });
 
 test('altchaRequired follows config.altcha.required', () => {
@@ -163,6 +183,7 @@ test('apiErrorKey maps each Stalwart code; username/domain suffixes split', () =
   assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Instant username must match dc_ + 12 hex chars')), 'validation_username_instant');
   assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username must be between 3 and 32 characters')), 'validation_username_length');
   assert.equal(apiErrorKey(api('invalid_username', "Invalid username: Username prefix 'dc_' is reserved for instant accounts")), 'validation_username_dc_prefix');
+  assert.equal(apiErrorKey(api('invalid_username', "Invalid username: Username prefix 'bot_' is reserved for instant accounts")), 'validation_username_dc_prefix');
   assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username is reserved')), 'validation_username_reserved');
   assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username cannot start/end with dot or contain consecutive dots')), 'validation_username_dots');
   assert.equal(apiErrorKey(api('invalid_username', 'Invalid username: Username contains invalid characters')), 'validation_username_chars');

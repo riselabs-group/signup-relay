@@ -42,10 +42,17 @@ export function validateCustomPassword(password: string, username = ''): CustomP
   return 'ok';
 }
 
-export function validateCustomUsername(username: string): CustomUsernameError {
+export function validateCustomUsername(
+  username: string,
+  config?: Partial<ServerConfig> | null
+): CustomUsernameError {
   const u = username.trim().toLowerCase();
   if (u.length < 3 || u.length > 32) return 'length';
-  if (u.startsWith('dc_')) return 'dc_prefix';
+  if (!config?.custom_prefix_enabled) {
+    const instantEnabled = config ? config.instant_prefix_enabled !== false : true;
+    const instantPrefix = (config?.instant_prefix ?? 'dc_').toLowerCase();
+    if (instantEnabled && instantPrefix && u.startsWith(instantPrefix)) return 'dc_prefix';
+  }
   if (RESERVED_NAMES.has(u)) return 'reserved';
   if (u.startsWith('.') || u.endsWith('.') || u.includes('..')) return 'dots';
   if (![...u].every((c) => /[a-z0-9._-]/.test(c))) return 'chars';
@@ -64,11 +71,15 @@ export function canSignup(config: ServerConfig): boolean {
   );
 }
 
-export function signupErrorKey(config: ServerConfig, kindEnabled = true): string | null {
+export function signupErrorKey(
+  config: ServerConfig,
+  kindEnabled = true,
+  kind: 'instant' | 'custom' = 'instant'
+): string | null {
   if (!isSupportedHashAlgorithm(config.password_hash_algorithm)) return 'error_unsupported_hash';
   if (!endpointsConfigured(config)) return 'error_endpoints_not_configured';
   if (!config.registration_open) return 'error_registration_closed';
-  if (!kindEnabled) return 'error_instant_accounts_disabled';
+  if (!kindEnabled) return kind === 'custom' ? 'error_custom_accounts_disabled' : 'error_instant_accounts_disabled';
   return null;
 }
 
@@ -120,7 +131,11 @@ export function apiErrorKey(err: unknown): string {
   const code = obj.error;
   const message = typeof obj.message === 'string' ? obj.message : '';
   if (code === 'invalid_username') {
-    return USERNAME_SUFFIX[suffixAfter(message, 'Invalid username: ')] ?? 'validation_username_format';
+    const rawSuffix = suffixAfter(message, 'Invalid username: ');
+    if (rawSuffix.startsWith("Username prefix '") && rawSuffix.endsWith("' is reserved for instant accounts")) {
+      return 'validation_username_dc_prefix';
+    }
+    return USERNAME_SUFFIX[rawSuffix] ?? 'validation_username_format';
   }
   if (code === 'invalid_domain') {
     return DOMAIN_SUFFIX[suffixAfter(message, 'Invalid domain: ')] ?? 'error_invalid_domain';

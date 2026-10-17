@@ -94,7 +94,7 @@ test('InstantQrCard component file enforces zero-CLS locked dimensions and bdi i
   assert.match(content, /service\.createInstantAccount/, 'Must call service.createInstantAccount');
   assert.match(content, /createAccountWithQr/);
   assert.match(content, /apiErrorKey/);
-  assert.match(content, /generateInstantUsername/);
+  assert.match(content, /generateInstantUsername\(config\)/, 'Must pass config to generateInstantUsername');
   assert.doesNotMatch(content, /service\.getConfig/);
   assert.doesNotMatch(content, /result\.dclogin_link/);
 });
@@ -138,6 +138,8 @@ test('CustomWizard component enforces 2-step wizard, locked height, AltchaWidget
   assert.match(content, /wizard_password_optional/);
   assert.match(content, /EyeOff/);
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>@\{(?:domain|SERVICE_CONFIG\.DOMAIN)\}<\/bdi>/, 'Must wrap domain badge in <bdi dir="ltr">');
+  assert.match(content, /hasCustomPrefix/, 'Must support dynamic custom prefix badge');
+  assert.match(content, /custom_accounts_enabled/, 'Must gate on custom_accounts_enabled');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{account\.email\}<\/bdi>/, 'Must wrap result email in <bdi dir="ltr">');
   assert.doesNotMatch(content, /result\.dclogin_link/);
 });

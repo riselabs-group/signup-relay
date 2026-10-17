@@ -18,7 +18,7 @@ type CustomAccountState = {
 
 function blockMsg(config: ServerConfig | null, t: (k: string) => string): string | null {
   if (!config) return null;
-  const key = signupErrorKey(config);
+  const key = signupErrorKey(config, config.custom_accounts_enabled !== false, 'custom');
   return key ? t(key) : null;
 }
 
@@ -50,9 +50,11 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
   const [copied, setCopied] = useState<boolean>(false);
   const [notInstalled, setNotInstalled] = useState<boolean>(false);
   const cleanupRef = useRef<(() => void) | null>(null);
-  const ready = !!config && canSignup(config);
+  const ready = !!config && canSignup(config) && config.custom_accounts_enabled !== false;
   const needAltcha = !!config && altchaRequired(config);
   const domain = config?.domain || SERVICE_CONFIG.DOMAIN;
+  const hasCustomPrefix = Boolean(config?.custom_prefix_enabled && config.custom_prefix);
+  const customPrefix = hasCustomPrefix ? (config?.custom_prefix ?? '') : '';
   const shownError = error || blockMsg(config, t);
 
   useEffect(() => () => { cleanupRef.current?.(); }, []);
@@ -61,11 +63,13 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
     if (e && e.preventDefault) e.preventDefault();
     if (!config || !ready) return;
 
-    const cleanUsername = username.trim();
-    const usernameErr = usernameErrorKey(validateCustomUsername(cleanUsername));
+    const cleanSuffix = username.trim();
+    if (!cleanSuffix) return setError(t('validation_username_length'));
+    const fullUsername = `${customPrefix}${cleanSuffix}`;
+    const usernameErr = usernameErrorKey(validateCustomUsername(fullUsername, config));
     if (usernameErr) return setError(t(usernameErr));
     if (password) {
-      const pwErr = passwordErrorKey(validateCustomPassword(password, cleanUsername));
+      const pwErr = passwordErrorKey(validateCustomPassword(password, fullUsername));
       if (pwErr) return setError(t(pwErr));
     }
     if (needAltcha && !altchaPayload) return setError(t('altcha_verifying'));
@@ -76,7 +80,7 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
     try {
       const data = await createAccountWithQr({
         config,
-        username: cleanUsername,
+        username: fullUsername,
         password: password || undefined,
         altchaPayload,
         create: (payload) => service.createCustomAccount(payload),
@@ -135,6 +139,11 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
                 <span>{t('wizard_username_label')}</span>
               </label>
               <div className="join w-full" dir="ltr">
+                {hasCustomPrefix && (
+                  <span className="join-item px-2.5 sm:px-3 text-xs bg-base-300/60 text-base-content/70 border border-base-300 flex items-center justify-center shrink-0 select-none">
+                    <bdi dir="ltr">{customPrefix}</bdi>
+                  </span>
+                )}
                 <input
                   type="text"
                   value={username}

@@ -11,6 +11,11 @@ test('mockService returns valid config and instant account DTO', async () => {
   assert.equal(config.domain, SERVICE_CONFIG.DOMAIN);
   assert.equal(config.registration_open, true);
   assert.equal(config.instant_accounts_enabled, true);
+  assert.equal(config.custom_accounts_enabled, true);
+  assert.equal(config.instant_prefix_enabled, true);
+  assert.equal(config.instant_prefix, 'dc_');
+  assert.equal(config.custom_prefix_enabled, false);
+  assert.equal(config.custom_prefix, '');
   assert.equal(config.password_hash_algorithm, 'argon2id');
   assert.ok(config.certificate_checks);
   assert.ok(config.endpoints?.imap?.host);

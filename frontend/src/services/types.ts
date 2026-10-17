@@ -18,6 +18,11 @@ export interface ServerConfig {
   domain: string;
   registration_open: boolean;
   instant_accounts_enabled?: boolean;
+  custom_accounts_enabled?: boolean;
+  instant_prefix_enabled?: boolean;
+  instant_prefix?: string;
+  custom_prefix_enabled?: boolean;
+  custom_prefix?: string;
   password_hash_algorithm: string;
   certificate_checks: string;
   endpoints: EndpointsConfig;

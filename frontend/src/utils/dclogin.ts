@@ -1,4 +1,5 @@
 import { API_DOMAIN } from '../api/registry.ts';
+import type { ServerConfig } from '../services/types.ts';
 
 export interface RandomCredentials {
   username: string;
@@ -95,10 +96,12 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
   return `dclogin:${email}/?${query}`;
 }
 
-export function generateInstantUsername(): string {
+export function generateInstantUsername(config?: Partial<ServerConfig> | null): string {
   const bytes = new Uint8Array(6);
   crypto.getRandomValues(bytes);
-  return 'dc_' + [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+  const prefix = config?.instant_prefix_enabled === false ? '' : (config?.instant_prefix ?? 'dc_');
+  return `${prefix}${hex}`;
 }
 
 export function openDeltaChatUri(

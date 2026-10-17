@@ -16,6 +16,11 @@ export const mockService: IService = {
       domain: SERVICE_CONFIG.DOMAIN,
       registration_open: true,
       instant_accounts_enabled: true,
+      custom_accounts_enabled: true,
+      instant_prefix_enabled: true,
+      instant_prefix: 'dc_',
+      custom_prefix_enabled: false,
+      custom_prefix: '',
       password_hash_algorithm: 'argon2id',
       certificate_checks: '1',
       endpoints: {
