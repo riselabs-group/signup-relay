@@ -7,7 +7,7 @@ const baseDir = fs.existsSync(path.resolve(process.cwd(), 'frontend'))
   ? path.resolve(process.cwd(), 'frontend')
   : process.cwd();
 
-test('tailwind configuration exports chatchi themes', () => {
+test('tailwind configuration exports MailiaM themes', () => {
   const configPath = path.resolve(baseDir, 'tailwind.config.js');
   assert.ok(fs.existsSync(configPath), 'tailwind.config.js must exist');
 
