@@ -34,7 +34,7 @@ export const fa: TranslationDictionary = {
   btn_submit: 'ساخت حساب اختصاصی',
   footer_fs_statement: 'این یک سرور برای ارتباط با دلتاچت است.',
   footer_powered_by: 'قدرت‌گرفته از چت‌چی برای استفاده با دلتاچت.',
-  footer_version: 'نسخه 0.02.1',
+  footer_version: 'نسخه 2.2.44',
   apps_title: 'فروشگاه برنامه‌های WebXDC',
   apps_subtitle: 'مینی‌اپ‌های مستقل برای اجرا درون گفتگوهای دلتاچت',
   apps_security_title: 'نکات امنیتی برنامه‌های WebXDC',
