@@ -21,7 +21,12 @@ export interface TranslationDictionary {
   index_manual_step1: string;
   index_manual_step2: string;
   index_manual_step3: string;
+  index_manual_step4: string;
+  index_manual_step5: string;
+  index_manual_copy_btn: string;
+  index_manual_copied: string;
   index_ios_title: string;
+  index_ios_desc: string;
   index_ios_path: string;
   status_online: string;
   status_offline: string;
@@ -127,12 +132,17 @@ export const en: TranslationDictionary = {
   index_copied: 'Copied to clipboard!',
   index_dc_not_installed: 'DeltaChat was not detected. Please install the app or use the copy link button.',
   index_manual_code_label: 'Direct invitation code / link:',
+  index_manual_copy_btn: 'Copy Code',
+  index_manual_copied: 'Copied!',
   index_manual_select_hint: 'Click to select all & copy',
-  index_manual_title: 'Manual setup instructions:',
-  index_manual_step1: 'In DeltaChat, tap "Create new profile".',
-  index_manual_step2: 'Select "Use Other Server".',
-  index_manual_step3: 'Scan invitation code or tap "Paste from clipboard".',
-  index_ios_title: 'iOS (iPhone) setup guide:',
+  index_manual_title: 'Manual setup instructions (if button above did not work):',
+  index_manual_step1: 'First, download and install DeltaChat (delta.chat/download).',
+  index_manual_step2: 'In DeltaChat, tap "Create new profile".',
+  index_manual_step3: 'Select "Use Other Server".',
+  index_manual_step4: 'Select "Scan Invitation Code".',
+  index_manual_step5: 'Copy the code above, tap the three dots (⋮) on the scan screen, and choose "Paste from clipboard".',
+  index_ios_title: 'Note for iPhone (iOS) users:',
+  index_ios_desc: 'Due to iOS system restrictions, it is recommended to copy the code above and follow this sequence when creating an account:',
   index_ios_path: 'New account > Use Other Server > Scan > Paste',
   status_online: 'Online',
   status_offline: 'Offline',
