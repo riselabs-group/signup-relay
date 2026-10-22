@@ -15,6 +15,8 @@ export interface TranslationDictionary {
   index_copy_link: string;
   index_copied: string;
   index_dc_not_installed: string;
+  index_manual_code_label: string;
+  index_manual_select_hint: string;
   index_manual_title: string;
   index_manual_step1: string;
   index_manual_step2: string;
@@ -124,6 +126,8 @@ export const en: TranslationDictionary = {
   index_copy_link: 'Copy Link',
   index_copied: 'Copied to clipboard!',
   index_dc_not_installed: 'DeltaChat was not detected. Please install the app or use the copy link button.',
+  index_manual_code_label: 'Direct invitation code / link:',
+  index_manual_select_hint: 'Click to select all & copy',
   index_manual_title: 'Manual setup instructions:',
   index_manual_step1: 'In DeltaChat, tap "Create new profile".',
   index_manual_step2: 'Select "Use Other Server".',

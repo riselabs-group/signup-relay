@@ -17,6 +17,8 @@ export const fa: TranslationDictionary = {
   index_copy_link: 'کپی لینک ورود',
   index_copied: 'لینک در کلیپ‌بورد کپی شد!',
   index_dc_not_installed: 'دلتاچت شناسایی نشد. لطفاً برنامه را نصب کرده یا از دکمه کپی لینک استفاده کنید.',
+  index_manual_code_label: 'کد دعوت / لینک اتصال مستقیم:',
+  index_manual_select_hint: 'کلیک کنید تا کل متن انتخاب شود',
   index_manual_title: 'راهنمای راه‌اندازی دستی:',
   index_manual_step1: 'در دلتاچت، «ساخت پروفایل جدید» را انتخاب کنید.',
   index_manual_step2: 'سپس روی «استفاده از سرور دیگر» بزنید.',

@@ -72,6 +72,8 @@ test('ManualInstructions component file exists and enforces bdi isolation for iO
   assert.match(content, /useI18n/, 'Must use useI18n hook');
   assert.match(content, /<bdi[^>]*dir=["']ltr["'][^>]*>\{t\(['"]index_ios_path['"]\)\}<\/bdi>/, 'Must wrap iOS path in <bdi dir="ltr">');
   assert.match(content, /index_manual_title/, 'Must display manual title');
+  assert.match(content, /dcloginLink/, 'Must receive dcloginLink');
+  assert.match(content, /select-all/, 'Must render selectable code box for manual copy');
 });
 
 test('InstantQrCard component file enforces zero-CLS locked dimensions and bdi isolation', () => {
