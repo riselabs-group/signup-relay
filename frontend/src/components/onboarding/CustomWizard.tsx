@@ -153,7 +153,7 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
                   type="text"
                   value={username}
                   onChange={(e) => {
-                    setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''));
+                    setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._+-]/g, ''));
                     if (error && ready) setError(null);
                   }}
                   placeholder="yourname"

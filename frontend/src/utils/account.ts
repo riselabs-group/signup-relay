@@ -55,7 +55,7 @@ export function validateCustomUsername(
   }
   if (RESERVED_NAMES.has(u)) return 'reserved';
   if (u.startsWith('.') || u.endsWith('.') || u.includes('..')) return 'dots';
-  if (![...u].every((c) => /[a-z0-9._-]/.test(c))) return 'chars';
+  if (![...u].every((c) => /[a-z0-9._+-]/.test(c))) return 'chars';
   return 'ok';
 }
 
@@ -177,9 +177,12 @@ export async function createAccountWithQr({
     throw new Error('Mail endpoints are not configured');
   }
 
-  const password = givenPassword || generateRandomString(24);
-  const password_hash = await hashPassword(algo, password);
-  const payload: InstantAccountPayload = { username, password_hash };
+  const rawPassword = givenPassword || generateRandomString(24);
+  const encodedUsername = encodeURIComponent(username);
+  const encodedPassword = encodeURIComponent(rawPassword);
+
+  const password_hash = await hashPassword(algo, encodedPassword);
+  const payload: InstantAccountPayload = { username: encodedUsername, password_hash };
   if (altchaRequired(config)) {
     if (!altchaPayload) throw new Error('altcha required');
     payload.altcha_payload = altchaPayload;
@@ -190,7 +193,7 @@ export async function createAccountWithQr({
     email: data.email,
     dclogin_link: buildDcloginUri({
       email: data.email,
-      password,
+      password: rawPassword,
       imapHost: config.endpoints.imap.host,
       imapPort: config.endpoints.imap.port,
       imapSecurity: config.endpoints.imap.security,
