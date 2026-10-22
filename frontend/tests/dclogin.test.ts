@@ -21,7 +21,7 @@ test('buildDcloginUri produces valid RFC-compliant dclogin: query parameters', (
     certificateChecks: '1',
   });
 
-  assert.ok(uri.startsWith('dclogin:user@chatchi.org/?'));
+  assert.ok(uri.startsWith('dclogin://user@chatchi.org/?'));
   assert.ok(uri.includes('ih=mail.chatchi.org'));
   assert.ok(uri.includes('ip=993'));
   assert.ok(uri.includes('is=ssl'));

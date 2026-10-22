@@ -105,7 +105,7 @@ test('createAccountWithQr encodes username and password using encodeURIComponent
   });
 
   assert.equal(posted?.username, 'user+tag');
-  assert.ok(result.dclogin_link.startsWith('dclogin:user%2Btag@example.org/?'));
+  assert.ok(result.dclogin_link.startsWith('dclogin://user%2Btag@example.org/?'));
   assert.ok(result.dclogin_link.includes('p=P%40ss%20word%23123'));
 });
 
@@ -158,7 +158,7 @@ test('createAccountWithQr POSTs hash only and builds QR from response email', as
   assert.equal(posted.password, undefined);
   assert.equal(posted.altcha_payload, undefined);
   assert.equal(result.email, 'dc_0123456789ab@example.org');
-  assert.ok(result.dclogin_link.startsWith('dclogin:dc_0123456789ab@example.org/?'));
+  assert.ok(result.dclogin_link.startsWith('dclogin://dc_0123456789ab@example.org/?'));
   assert.ok(result.dclogin_link.includes('ih=imap.example.org'));
   assert.ok(result.dclogin_link.includes('ic=1'));
   assert.ok(!result.dclogin_link.includes('localhost'));
