@@ -1,12 +1,16 @@
 {
-  "name": "rise-relay-registration",
+  "name": "mailiam-portal",
+  "version": "2.2.49",
   "private": true,
+  "description": "MailiaM - Decoupled Delta Chat onboarding, share cards, and WebXDC apps portal",
   "scripts": {
     "dev": "npm --prefix frontend run dev",
-    "start": "./run-all.sh",
+    "start": "npm --prefix frontend run dev",
     "ve": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend run build",
     "preview": "npm --prefix frontend run preview",
+    "test": "npm --prefix frontend run test",
+    "typecheck": "npm --prefix frontend run typecheck",
     "install:frontend": "npm --prefix frontend install"
   }
 }
