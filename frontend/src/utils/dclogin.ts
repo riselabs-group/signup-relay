@@ -94,6 +94,13 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
     throw new Error('DCLogin endpoints are required');
   }
 
+  let normalizedIc = String(certificateChecks);
+  if (certificateChecks === false || certificateChecks === 'false' || certificateChecks === 0 || certificateChecks === '0') {
+    normalizedIc = '0';
+  } else if (certificateChecks === true || certificateChecks === 'true' || certificateChecks === 1 || certificateChecks === '1') {
+    normalizedIc = '1';
+  }
+
   const query = [
     `p=${encodeURIComponent(password)}`,
     'v=1',
@@ -103,7 +110,7 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
     `sh=${encodeURIComponent(smtpHost)}`,
     `sp=${smtpPort}`,
     `ss=${encodeURIComponent(smtpSecurity)}`,
-    `ic=${encodeURIComponent(String(certificateChecks))}`,
+    `ic=${encodeURIComponent(normalizedIc)}`,
   ].join('&');
 
   return `dclogin:${email}/?${query}`;
