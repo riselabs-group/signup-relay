@@ -6,6 +6,7 @@ import { SERVICE_CONFIG } from '../../services/config.ts';
 import type { ServerConfig } from '../../services/types.ts';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
 import { openDeltaChatUri } from '../../utils/dclogin.ts';
+import { copyToClipboard } from '../../utils/clipboard.ts';
 import { altchaRequired, apiErrorKey, canSignup, createAccountWithQr, signupErrorKey, validateCustomPassword, validateCustomUsername } from '../../utils/account.ts';
 import { ManualInstructions } from './ManualInstructions.tsx';
 import { AltchaWidget } from './AltchaWidget.tsx';
@@ -96,10 +97,14 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
 
   const handleCopy = () => {
     if (!account) return;
+    copyToClipboard(account.dclogin_link).then((ok) => {
+      if (ok) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    });
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(account.dclogin_link).catch(() => {});
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
   };
 

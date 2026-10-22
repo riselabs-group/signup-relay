@@ -3,6 +3,7 @@ import { useI18n } from '../../i18n/index.tsx';
 import { generateQrSvgDataUri } from '../../utils/qr.ts';
 import { API_DOMAIN } from '../../api/registry.ts';
 import { getDomainName } from '../../utils/dclogin.ts';
+import { copyToClipboard } from '../../utils/clipboard.ts';
 
 export interface ShareCardProps {
   embedded?: boolean;
@@ -19,6 +20,12 @@ export function ShareCard({ embedded = false }: ShareCardProps = {}) {
   const qrDataUri = useMemo(() => generateQrSvgDataUri(inviteUri, 160), [inviteUri]);
 
   const handleCopy = () => {
+    copyToClipboard(inviteUri).then((ok) => {
+      if (ok) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    });
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(inviteUri)
         .then(() => {
