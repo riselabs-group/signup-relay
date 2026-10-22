@@ -177,12 +177,9 @@ export async function createAccountWithQr({
     throw new Error('Mail endpoints are not configured');
   }
 
-  const rawPassword = givenPassword || generateRandomString(24);
-  const encodedUsername = encodeURIComponent(username);
-  const encodedPassword = encodeURIComponent(rawPassword);
-
-  const password_hash = await hashPassword(algo, encodedPassword);
-  const payload: InstantAccountPayload = { username: encodedUsername, password_hash };
+  const password = givenPassword || generateRandomString(24);
+  const password_hash = await hashPassword(algo, password);
+  const payload: InstantAccountPayload = { username, password_hash };
   if (altchaRequired(config)) {
     if (!altchaPayload) throw new Error('altcha required');
     payload.altcha_payload = altchaPayload;
@@ -193,7 +190,7 @@ export async function createAccountWithQr({
     email: data.email,
     dclogin_link: buildDcloginUri({
       email: data.email,
-      password: rawPassword,
+      password,
       imapHost: config.endpoints.imap.host,
       imapPort: config.endpoints.imap.port,
       imapSecurity: config.endpoints.imap.security,

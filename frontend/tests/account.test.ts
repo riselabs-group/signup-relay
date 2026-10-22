@@ -92,7 +92,7 @@ test('createAccountWithQr hashes a given custom password', async () => {
   assert.ok(result.dclogin_link.includes('p=Abcdefgh1-xy'));
 });
 
-test('createAccountWithQr encodes username and password using encodeURIComponent', async () => {
+test('createAccountWithQr encodes username and password using encodeURIComponent in dclogin link', async () => {
   let posted: Record<string, unknown> | null = null;
   const result = await createAccountWithQr({
     config: cfg(),
@@ -104,7 +104,8 @@ test('createAccountWithQr encodes username and password using encodeURIComponent
     },
   });
 
-  assert.equal(posted?.username, 'user%2Btag');
+  assert.equal(posted?.username, 'user+tag');
+  assert.ok(result.dclogin_link.startsWith('dclogin:user%2Btag@example.org/?'));
   assert.ok(result.dclogin_link.includes('p=P%40ss%20word%23123'));
 });
 

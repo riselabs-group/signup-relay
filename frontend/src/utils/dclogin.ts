@@ -113,7 +113,12 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
     `ic=${encodeURIComponent(normalizedIc)}`,
   ].join('&');
 
-  return `dclogin:${email}/?${query}`;
+  const atIdx = email.lastIndexOf('@');
+  const encodedEmail = atIdx > 0
+    ? `${encodeURIComponent(email.slice(0, atIdx))}@${email.slice(atIdx + 1)}`
+    : encodeURIComponent(email);
+
+  return `dclogin:${encodedEmail}/?${query}`;
 }
 
 export function generateInstantUsername(config?: Partial<ServerConfig> | null): string {
