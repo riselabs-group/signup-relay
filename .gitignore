@@ -1,9 +1,32 @@
+# Dependencies & Build
 node_modules/
 dist/
 frontend/node_modules/
 frontend/dist/
-.superpowers/
+
+# Python & Django Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+*.db
+.venv/
+env/
+venv/
+
+# Environment & Secrets
 .env
-.env.local
+.env.*
+!.env.example
+backend/.env
+
+# Logs & Diagnostics
 *.log
 graphify-out/
+.superpowers/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
