@@ -1,5 +1,7 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/index.tsx';
+import { useServerConfig } from '../../services/ConfigContext.tsx';
+import { getPlatformName, getPlatformFavicon } from '../../utils/branding.ts';
 import { Navbar, type RouteKey } from './Navbar.tsx';
 import { Footer } from './Footer.tsx';
 
@@ -10,10 +12,36 @@ export interface ShellProps {
 }
 
 export function Shell({ currentRoute, onNavigate, children }: ShellProps) {
-  const { dir } = useI18n();
+  const { dir, lang, t } = useI18n();
+  const config = useServerConfig();
+  const platformName = getPlatformName(config, lang);
   const [theme, setTheme] = useState<string>(() => {
     return (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme')) || 'chatchi-dark';
   });
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const routeTitles: Record<RouteKey, string> = {
+      home: `${platformName} — DeltaChat Portal`,
+      share: `${t('nav_share')} — ${platformName}`,
+      apps: `${t('nav_apps')} — ${platformName}`,
+      docs: `${t('nav_docs')} — ${platformName}`,
+      community: `${t('nav_community')} — ${platformName}`,
+    };
+    document.title = routeTitles[currentRoute] || platformName;
+  }, [currentRoute, platformName, t]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const faviconHref = getPlatformFavicon(config);
+    let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = faviconHref;
+  }, [config]);
 
   const toggleTheme = () => {
     const next = theme === 'chatchi-dark' ? 'chatchi-light' : 'chatchi-dark';

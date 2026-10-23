@@ -2,20 +2,32 @@ import { useState, useEffect } from 'react';
 import { ShieldCheck, Globe, Zap, Sparkles, UserPlus, Video, HardDrive, Layers } from 'lucide-react';
 import { useI18n } from '../i18n/index.tsx';
 import { service } from '../services/index.ts';
+import { useServerConfig } from '../services/ConfigContext.tsx';
+import { getPlatformName } from '../utils/branding.ts';
 import type { ServerConfig } from '../services/types.ts';
 import { InstantQrCard } from '../components/onboarding/InstantQrCard.tsx';
 import { CustomWizard } from '../components/onboarding/CustomWizard.tsx';
+import { ClientDownloads } from '../components/onboarding/ClientDownloads.tsx';
 
 export type OnboardingTab = 'instant' | 'custom';
 
 // ponytail: single landing route composing hero with cta, feature cards, and bottom account setup; upgrade to nested routes if deeplinking to tabs needed
 export function OnboardingRoute() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const contextConfig = useServerConfig();
   const [tab, setTab] = useState<OnboardingTab>('instant');
   const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [config, setConfig] = useState<ServerConfig | null>(null);
+  const [config, setConfig] = useState<ServerConfig | null>(contextConfig);
+
+  const effectiveConfig = contextConfig || config;
+  const platformName = getPlatformName(effectiveConfig, lang);
 
   useEffect(() => {
+    if (contextConfig) {
+      setConfig(contextConfig);
+      setIsOnline(Boolean(contextConfig.registration_open));
+      return;
+    }
     let mounted = true;
     service.getConfig()
       .then((cfg) => {
@@ -28,7 +40,7 @@ export function OnboardingRoute() {
         setIsOnline(false);
       });
     return () => { mounted = false; };
-  }, []);
+  }, [contextConfig]);
 
   const scrollToSetup = () => {
     const el = document.getElementById('account-setup');
@@ -45,7 +57,7 @@ export function OnboardingRoute() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 backdrop-blur-sm mb-4">
               <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span>{t('app_title')}</span>
+              <span>{platformName}</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-base-content mb-4">
@@ -86,7 +98,10 @@ export function OnboardingRoute() {
         </div>
       </section>
 
-      {/* 2. Platform Feature Cards (Icon, Title, Description) */}
+      {/* 2. Client Download Buttons */}
+      <ClientDownloads />
+
+      {/* 3. Platform Feature Cards (Icon, Title, Description) */}
       <section className="w-full max-w-5xl mx-auto my-6 sm:my-8 px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="card bg-base-200/60 backdrop-blur-md border border-base-300/60 p-5 rounded-box shadow-sm">
@@ -129,7 +144,9 @@ export function OnboardingRoute() {
           <div className="card-body p-5 sm:p-6">
             <div className="flex items-center justify-between pb-3 border-b border-base-300">
               <div>
-                <h2 className="card-title text-base font-bold">{t('index_title')}</h2>
+                <h2 className="card-title text-base font-bold">
+                  {lang === 'fa' ? `سرور دلتاچت ${platformName}` : `${platformName} Relay`}
+                </h2>
                 <p className="text-xs text-base-content/70">{t('index_subtitle')}</p>
               </div>
               {isOnline ? (

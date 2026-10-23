@@ -14,6 +14,24 @@ export interface AltchaConfig {
   max_number: number;
 }
 
+export interface LinkItem {
+  id?: string;
+  title: string;
+  title_fa?: string;
+  link: string;
+  icon?: string;
+  image_url?: string;
+}
+
+export interface DownloadLinkItem extends LinkItem {
+  is_direct?: boolean;
+}
+
+export interface PlatformNameConfig {
+  en: string;
+  fa: string;
+}
+
 export interface ServerConfig {
   domain: string;
   registration_open: boolean;
@@ -27,6 +45,12 @@ export interface ServerConfig {
   certificate_checks: string;
   endpoints: EndpointsConfig;
   altcha?: AltchaConfig;
+  platform_name?: PlatformNameConfig;
+  platform_icon?: string;
+  platform_image_url?: string;
+  admin_contacts?: LinkItem[];
+  donation_links?: LinkItem[];
+  download_links?: DownloadLinkItem[];
 }
 
 export interface AltchaChallenge {

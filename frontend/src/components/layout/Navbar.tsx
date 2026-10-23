@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu, Sun, Moon } from 'lucide-react';
 import { useI18n } from '../../i18n/index.tsx';
+import { useServerConfig } from '../../services/ConfigContext.tsx';
+import { getPlatformName, getPlatformLogo } from '../../utils/branding.ts';
+import type { RouteKey } from '../../utils/router.ts';
 
-export type RouteKey = 'home' | 'share' | 'apps' | 'docs';
+export type { RouteKey };
 
 export interface NavbarProps {
   currentRoute: RouteKey;
@@ -13,6 +16,9 @@ export interface NavbarProps {
 
 export function Navbar({ currentRoute, onNavigate, onToggleTheme, currentTheme }: NavbarProps) {
   const { t, lang, toggleLang } = useI18n();
+  const config = useServerConfig();
+  const platformName = getPlatformName(config, lang) || t('app_title');
+  const logoSrc = getPlatformLogo(config);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -81,6 +87,18 @@ export function Navbar({ currentRoute, onNavigate, onToggleTheme, currentTheme }
                   </li>
                   <li>
                     <a
+                      href="/community"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNav('community');
+                      }}
+                      className={currentRoute === 'community' ? 'active' : ''}
+                    >
+                      {t('nav_community')}
+                    </a>
+                  </li>
+                  <li>
+                    <a
                       href="/docs"
                       onClick={(e) => {
                         e.preventDefault();
@@ -108,11 +126,15 @@ export function Navbar({ currentRoute, onNavigate, onToggleTheme, currentTheme }
               }}
             >
               <img
-                src="./logo.svg"
-                alt={t('app_title')}
+                src={logoSrc}
+                alt={platformName || t('app_title')}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = './logo.svg';
+                }}
                 className="h-8 max-h-8 w-auto max-w-[120px] object-contain shrink-0"
               />
-              <span className="font-bold text-base tracking-tight">{t('app_title')}</span>
+              <span className="font-bold text-base tracking-tight">{platformName}</span>
             </div>
           </div>
 
@@ -141,6 +163,18 @@ export function Navbar({ currentRoute, onNavigate, onToggleTheme, currentTheme }
                   className={currentRoute === 'apps' ? 'active' : ''}
                 >
                   {t('nav_apps')}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/community"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('community');
+                  }}
+                  className={currentRoute === 'community' ? 'active' : ''}
+                >
+                  {t('nav_community')}
                 </a>
               </li>
               <li>

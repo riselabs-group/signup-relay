@@ -3,13 +3,13 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
 export default defineConfig({
-  base: process.env.VITE_BASE_PATH || './',
+  base: process.env.VITE_BASE_PATH || "./",
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
+      "/api": {
+        target: "http://rezishon.test",
         changeOrigin: true,
       },
     },
@@ -21,6 +21,7 @@ export default defineConfig({
         share: resolve(import.meta.dirname, "share.html"),
         apps: resolve(import.meta.dirname, "apps.html"),
         docs: resolve(import.meta.dirname, "docs.html"),
+        community: resolve(import.meta.dirname, "community.html"),
       },
     },
   },

@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from './i18n/index.tsx';
+import { ConfigProvider } from './services/ConfigContext.tsx';
 import { Shell } from './components/layout/Shell.tsx';
 import type { RouteKey } from './components/layout/Navbar.tsx';
 import { OnboardingRoute } from './routes/OnboardingRoute.tsx';
 import { ShareRoute } from './routes/ShareRoute.tsx';
 import { AppsRoute } from './routes/AppsRoute.tsx';
 import { DocsRoute } from './routes/DocsRoute.tsx';
+import { CommunityRoute } from './routes/CommunityRoute.tsx';
 import { getRouteFromPath, getPathForRoute } from './utils/router.ts';
 
 export { getRouteFromPath, getPathForRoute };
@@ -54,6 +56,7 @@ export function AppContent({ initialRoute }: AppProps) {
       {route === 'home' && <OnboardingRoute />}
       {route === 'share' && <ShareRoute />}
       {route === 'apps' && <AppsRoute />}
+      {route === 'community' && <CommunityRoute />}
       {route === 'docs' && <DocsRoute />}
     </Shell>
   );
@@ -62,7 +65,9 @@ export function AppContent({ initialRoute }: AppProps) {
 export default function App(props: AppProps) {
   return (
     <I18nProvider>
-      <AppContent {...props} />
+      <ConfigProvider>
+        <AppContent {...props} />
+      </ConfigProvider>
     </I18nProvider>
   );
 }

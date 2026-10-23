@@ -6,6 +6,17 @@ export interface TranslationDictionary {
   nav_share: string;
   nav_apps: string;
   nav_docs: string;
+  nav_community: string;
+  community_title: string;
+  community_subtitle: string;
+  community_no_content: string;
+  community_contacts_title: string;
+  community_donations_title: string;
+  community_copied: string;
+  community_copy_btn: string;
+  downloads_title: string;
+  downloads_subtitle: string;
+  download_direct_badge: string;
   index_title: string;
   index_subtitle: string;
   tab_instant: string;
@@ -127,6 +138,17 @@ export const en: TranslationDictionary = {
   nav_share: 'Share ID',
   nav_apps: 'WebXDC Apps',
   nav_docs: 'Docs',
+  nav_community: 'Community & Support',
+  community_title: 'Community & Support',
+  community_subtitle: 'Direct administrator channels, community rooms, and server contribution options.',
+  community_no_content: 'No contact channels or donation addresses configured yet.',
+  community_contacts_title: 'Admin & Support Channels',
+  community_donations_title: 'Donations & Server Support',
+  community_copied: 'Address copied!',
+  community_copy_btn: 'Copy Address',
+  downloads_title: 'Download DeltaChat',
+  downloads_subtitle: 'Choose the download method best suited for your device and network.',
+  download_direct_badge: 'Direct Server Download',
   index_title: 'MailiaM Relay',
   index_subtitle: 'Secure, decentralized communication for DeltaChat.',
   tab_instant: 'Instant Setup',
