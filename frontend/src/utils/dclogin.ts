@@ -23,7 +23,17 @@ export function generateRandomString(length: number): string {
 }
 
 export function getDomainName(domainOrUrl: string = API_DOMAIN): string {
-  return domainOrUrl.replace(/^https?:\/\//, '').split(':')[0].split('/')[0] || 'chatchi.org';
+  if (domainOrUrl) {
+    const extracted = domainOrUrl.replace(/^https?:\/\//, '').split(':')[0].split('/')[0];
+    if (extracted) return extracted;
+  }
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname;
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return host;
+    }
+  }
+  return 'chatchi.org';
 }
 
 export function generateRandomCredentials(domain: string = getDomainName(API_DOMAIN)): RandomCredentials {
@@ -45,7 +55,7 @@ export interface DcloginUriOptions {
   smtpHost: string;
   smtpPort: number;
   smtpSecurity: string;
-  certificateChecks: string;
+  certificateChecks?: string | number | boolean;
 }
 
 export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): string {
@@ -69,6 +79,7 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
     throw new Error('Email contains invalid URI characters');
   }
 
+  // ponytail: support numeric 0 / string '0' for self-signed or raw-IP environments where TLS verification must be skipped
   if (
     !imapHost ||
     imapPort === undefined ||
@@ -76,9 +87,18 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
     !smtpHost ||
     smtpPort === undefined ||
     !smtpSecurity ||
-    !certificateChecks
+    certificateChecks === undefined ||
+    certificateChecks === null ||
+    certificateChecks === ''
   ) {
     throw new Error('DCLogin endpoints are required');
+  }
+
+  let normalizedIc = String(certificateChecks);
+  if (certificateChecks === false || certificateChecks === 'false' || certificateChecks === 0 || certificateChecks === '0') {
+    normalizedIc = '0';
+  } else if (certificateChecks === true || certificateChecks === 'true' || certificateChecks === 1 || certificateChecks === '1') {
+    normalizedIc = '1';
   }
 
   const query = [
@@ -90,15 +110,24 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
     `sh=${encodeURIComponent(smtpHost)}`,
     `sp=${smtpPort}`,
     `ss=${encodeURIComponent(smtpSecurity)}`,
-    `ic=${encodeURIComponent(certificateChecks)}`,
+    `ic=${encodeURIComponent(normalizedIc)}`,
   ].join('&');
 
-  return `dclogin:${email}/?${query}`;
+  const atIdx = email.lastIndexOf('@');
+  const encodedEmail = atIdx > 0
+    ? `${encodeURIComponent(email.slice(0, atIdx))}@${email.slice(atIdx + 1)}`
+    : encodeURIComponent(email);
+
+  return `dclogin:${encodedEmail}/?${query}`;
 }
 
 export function generateInstantUsername(config?: Partial<ServerConfig> | null): string {
   const bytes = new Uint8Array(6);
-  crypto.getRandomValues(bytes);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 6; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
   const hex = [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
   const prefix = config?.instant_prefix_enabled === false ? '' : (config?.instant_prefix ?? 'dc_');
   return `${prefix}${hex}`;

@@ -1,10 +1,19 @@
+import { sha256 } from 'hash-wasm';
 import type { AltchaChallenge } from '../services/types.ts';
 
+// ponytail: use native crypto.subtle when available in Secure Contexts, with seamless hash-wasm fallback for plain HTTP / raw IP
 export async function sha256Hex(data: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
-  const hashArray = Array.from(new Uint8Array(buffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  if (typeof crypto !== 'undefined' && crypto.subtle?.digest) {
+    try {
+      const encoder = new TextEncoder();
+      const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
+      const hashArray = Array.from(new Uint8Array(buffer));
+      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+      // Insecure context or subtle restriction: fall through to hash-wasm
+    }
+  }
+  return sha256(data);
 }
 
 export function encodeBase64(str: string): string {

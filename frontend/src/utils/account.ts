@@ -55,8 +55,13 @@ export function validateCustomUsername(
   }
   if (RESERVED_NAMES.has(u)) return 'reserved';
   if (u.startsWith('.') || u.endsWith('.') || u.includes('..')) return 'dots';
-  if (![...u].every((c) => /[a-z0-9._-]/.test(c))) return 'chars';
+  if (![...u].every((c) => /[a-z0-9._+-]/.test(c))) return 'chars';
   return 'ok';
+}
+
+export function isRawIpOrLocal(host: string): boolean {
+  if (!host) return false;
+  return /^(\d{1,3}\.){3}\d{1,3}$/.test(host) || host.includes(':') || host === 'localhost' || host === '127.0.0.1';
 }
 
 export function endpointsConfigured(config: ServerConfig): boolean {
@@ -192,7 +197,10 @@ export async function createAccountWithQr({
       smtpHost: config.endpoints.smtp.host,
       smtpPort: config.endpoints.smtp.port,
       smtpSecurity: config.endpoints.smtp.security,
-      certificateChecks: config.certificate_checks,
+      certificateChecks:
+        config.certificate_checks !== undefined && config.certificate_checks !== null && config.certificate_checks !== ''
+          ? config.certificate_checks
+          : (isRawIpOrLocal(config.endpoints.imap.host) ? '0' : '1'),
     }),
   };
 }

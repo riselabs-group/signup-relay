@@ -108,7 +108,7 @@ export function Navbar({ currentRoute, onNavigate, onToggleTheme, currentTheme }
               }}
             >
               <img
-                src="/logo.svg"
+                src="./logo.svg"
                 alt={t('app_title')}
                 className="h-8 max-h-8 w-auto max-w-[120px] object-contain shrink-0"
               />

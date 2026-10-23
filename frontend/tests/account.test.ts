@@ -47,6 +47,8 @@ test('generateInstantUsername is dc_ plus 12 hex by default and honors prefix co
 test('validateCustomUsername accepts 3-32 [a-z0-9._-] without dc_ or reserved', () => {
   assert.equal(validateCustomUsername('abc'), 'ok');
   assert.equal(validateCustomUsername('user.name-1_x'), 'ok');
+  assert.equal(validateCustomUsername('user+tag'), 'ok');
+  assert.equal(validateCustomUsername('alice+delta-chat'), 'ok');
   assert.equal(validateCustomUsername('a'.repeat(32)), 'ok');
 });
 
@@ -88,6 +90,23 @@ test('createAccountWithQr hashes a given custom password', async () => {
   assert.ok(String(posted?.password_hash).startsWith('$argon2id$'));
   assert.equal(posted?.password, undefined);
   assert.ok(result.dclogin_link.includes('p=Abcdefgh1-xy'));
+});
+
+test('createAccountWithQr encodes username and password using encodeURIComponent in dclogin link', async () => {
+  let posted: Record<string, unknown> | null = null;
+  const result = await createAccountWithQr({
+    config: cfg(),
+    username: 'user+tag',
+    password: 'P@ss word#123',
+    create: async (payload) => {
+      posted = payload as unknown as Record<string, unknown>;
+      return { email: 'user+tag@example.org', account_type: 'custom' as const };
+    },
+  });
+
+  assert.equal(posted?.username, 'user+tag');
+  assert.ok(result.dclogin_link.startsWith('dclogin:user%2Btag@example.org/?'));
+  assert.ok(result.dclogin_link.includes('p=P%40ss%20word%23123'));
 });
 
 test('validateCustomUsername rejects format, dc_ prefix, and reserved names', () => {

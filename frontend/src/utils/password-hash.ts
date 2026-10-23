@@ -7,7 +7,15 @@ export function isSupportedHashAlgorithm(a: string): a is HashAlgorithm {
 }
 
 function randomSalt(bytes = 16): Uint8Array {
-  return crypto.getRandomValues(new Uint8Array(bytes));
+  const arr = new Uint8Array(bytes);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(arr);
+  } else {
+    for (let i = 0; i < bytes; i++) {
+      arr[i] = Math.floor(Math.random() * 256);
+    }
+  }
+  return arr;
 }
 
 function phcB64(data: Uint8Array): string {
