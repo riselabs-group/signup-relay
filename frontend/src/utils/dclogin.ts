@@ -114,11 +114,13 @@ export function buildDcloginUri(options: Partial<DcloginUriOptions> = {}): strin
   ].join('&');
 
   const atIdx = email.lastIndexOf('@');
-  const encodedEmail = atIdx > 0
-    ? `${encodeURIComponent(email.slice(0, atIdx))}@${email.slice(atIdx + 1)}`
-    : encodeURIComponent(email);
+  const userPart = atIdx > 0 ? email.slice(0, atIdx) : email;
+  const hostPart = atIdx > 0 ? email.slice(atIdx + 1) : '';
 
-  return `dclogin:${encodedEmail}/?${query}`;
+  const encodedUser = encodeURIComponent(userPart);
+  const formattedAuthority = hostPart ? `${encodedUser}@${hostPart}` : encodedUser;
+
+  return `dclogin://${formattedAuthority}/?${query}`;
 }
 
 export function generateInstantUsername(config?: Partial<ServerConfig> | null): string {
@@ -136,7 +138,7 @@ export function generateInstantUsername(config?: Partial<ServerConfig> | null): 
 export function openDeltaChatUri(
   dcloginUrl: string,
   onFallback?: () => void,
-  timeoutMs: number = 2000
+  timeoutMs: number = 3500
 ): () => void {
   if (typeof window === 'undefined') return () => {};
 
@@ -157,13 +159,21 @@ export function openDeltaChatUri(
   const cleanup = () => {
     if (timer) clearTimeout(timer);
     window.removeEventListener('blur', handleBlur);
+    window.removeEventListener('pagehide', handleBlur);
     document.removeEventListener('visibilitychange', handleVisibility);
   };
 
   window.addEventListener('blur', handleBlur, { once: true });
+  window.addEventListener('pagehide', handleBlur, { once: true });
   document.addEventListener('visibilitychange', handleVisibility);
 
-  window.location.href = dcloginUrl;
+  try {
+    window.location.href = dcloginUrl;
+  } catch {
+    if (!opened && typeof onFallback === 'function') {
+      onFallback();
+    }
+  }
 
   timer = setTimeout(() => {
     cleanup();

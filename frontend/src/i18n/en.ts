@@ -15,11 +15,23 @@ export interface TranslationDictionary {
   index_copy_link: string;
   index_copied: string;
   index_dc_not_installed: string;
+  index_manual_code_label: string;
+  index_manual_select_hint: string;
   index_manual_title: string;
   index_manual_step1: string;
   index_manual_step2: string;
   index_manual_step3: string;
+  index_manual_step4: string;
+  index_manual_step5: string;
+  index_manual_copy_btn: string;
+  index_manual_copied: string;
   index_ios_title: string;
+  index_ios_desc: string;
+  index_ios_step1: string;
+  index_ios_step2: string;
+  index_ios_step3: string;
+  index_ios_step4: string;
+  index_ios_step5: string;
   index_ios_path: string;
   status_online: string;
   status_offline: string;
@@ -124,11 +136,23 @@ export const en: TranslationDictionary = {
   index_copy_link: 'Copy Link',
   index_copied: 'Copied to clipboard!',
   index_dc_not_installed: 'DeltaChat was not detected. Please install the app or use the copy link button.',
-  index_manual_title: 'Manual setup instructions:',
-  index_manual_step1: 'In DeltaChat, tap "Create new profile".',
-  index_manual_step2: 'Select "Use Other Server".',
-  index_manual_step3: 'Scan invitation code or tap "Paste from clipboard".',
-  index_ios_title: 'iOS (iPhone) setup guide:',
+  index_manual_code_label: 'Direct invitation code / link:',
+  index_manual_copy_btn: 'Copy Code',
+  index_manual_copied: 'Copied!',
+  index_manual_select_hint: 'Click to select all & copy',
+  index_manual_title: 'Manual setup instructions (if button above did not work):',
+  index_manual_step1: 'First, download and install DeltaChat (delta.chat/download).',
+  index_manual_step2: 'In DeltaChat, tap "Create new profile".',
+  index_manual_step3: 'Select "Use Other Server".',
+  index_manual_step4: 'Select "Scan Invitation Code".',
+  index_manual_step5: 'Copy the code above, tap the three dots (⋮) on the scan screen, and choose "Paste from clipboard".',
+  index_ios_title: 'Dedicated guide for iPhone (iOS) users:',
+  index_ios_desc: 'The "Open DeltaChat" button normally works on iOS as well (simply tap "Open" when prompted). However, if Safari or the in-app browser blocks it, follow these steps:',
+  index_ios_step1: 'Copy the invitation code above using the "Copy Code" button.',
+  index_ios_step2: 'Open DeltaChat on your iPhone and tap "New Account".',
+  index_ios_step3: 'Select "Use Other Server".',
+  index_ios_step4: 'Tap "Scan" (Scan Invitation Code).',
+  index_ios_step5: 'On the scanner screen, tap "Paste" to import the code and connect immediately.',
   index_ios_path: 'New account > Use Other Server > Scan > Paste',
   status_online: 'Online',
   status_offline: 'Offline',

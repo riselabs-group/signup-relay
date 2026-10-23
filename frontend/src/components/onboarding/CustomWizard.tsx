@@ -111,6 +111,7 @@ export function CustomWizard({ config }: { config: ServerConfig | null }) {
   const handleOpenApp = () => {
     if (!account) return;
     cleanupRef.current?.();
+    copyToClipboard(account.dclogin_link).catch(() => {});
     cleanupRef.current = openDeltaChatUri(account.dclogin_link, () => setNotInstalled(true));
   };
 
