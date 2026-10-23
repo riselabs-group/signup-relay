@@ -7,7 +7,7 @@ export interface ManualInstructionsProps {
   dcloginLink?: string;
 }
 
-// ponytail: copyable code box with dedicated copy button and foolproof numbered steps; upgrade to interactive stepper if onboarding telemetry requested
+// ponytail: copyable code box with dedicated copy button, foolproof numbered steps, and dedicated iOS guide; upgrade to interactive stepper if onboarding telemetry requested
 export function ManualInstructions({ dcloginLink }: ManualInstructionsProps) {
   const { t } = useI18n();
   const [codeCopied, setCodeCopied] = useState(false);
@@ -59,6 +59,7 @@ export function ManualInstructions({ dcloginLink }: ManualInstructionsProps) {
         </div>
       )}
 
+      {/* General Manual Instructions */}
       <div className="card bg-base-300/40 border border-base-300 p-4 rounded-lg text-start space-y-2.5">
         <h4 className="text-xs font-bold text-base-content leading-snug">{t('index_manual_title')}</h4>
         <ol className="text-xs text-base-content/85 list-decimal list-inside space-y-1.5 leading-relaxed">
@@ -81,9 +82,17 @@ export function ManualInstructions({ dcloginLink }: ManualInstructionsProps) {
         </ol>
       </div>
 
-      <div className="card bg-base-300/40 border border-base-300 p-4 rounded-lg text-start space-y-2">
+      {/* Dedicated iOS (iPhone) Instructions */}
+      <div className="card bg-base-300/40 border border-base-300 p-4 rounded-lg text-start space-y-2.5">
         <h4 className="text-xs font-bold text-base-content">{t('index_ios_title')}</h4>
         <p className="text-xs text-base-content/80 leading-relaxed">{t('index_ios_desc')}</p>
+        <ol className="text-xs text-base-content/85 list-decimal list-inside space-y-1.5 leading-relaxed">
+          <li>{t('index_ios_step1')}</li>
+          <li>{t('index_ios_step2')}</li>
+          <li>{t('index_ios_step3')}</li>
+          <li>{t('index_ios_step4')}</li>
+          <li>{t('index_ios_step5')}</li>
+        </ol>
         <p className="text-xs font-mono bg-base-100 p-2 rounded border border-base-300 select-all text-start" dir="ltr">
           <bdi dir="ltr">{t('index_ios_path')}</bdi>
         </p>

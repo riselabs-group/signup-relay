@@ -27,6 +27,11 @@ export interface TranslationDictionary {
   index_manual_copied: string;
   index_ios_title: string;
   index_ios_desc: string;
+  index_ios_step1: string;
+  index_ios_step2: string;
+  index_ios_step3: string;
+  index_ios_step4: string;
+  index_ios_step5: string;
   index_ios_path: string;
   status_online: string;
   status_offline: string;
@@ -141,8 +146,13 @@ export const en: TranslationDictionary = {
   index_manual_step3: 'Select "Use Other Server".',
   index_manual_step4: 'Select "Scan Invitation Code".',
   index_manual_step5: 'Copy the code above, tap the three dots (⋮) on the scan screen, and choose "Paste from clipboard".',
-  index_ios_title: 'Note for iPhone (iOS) users:',
-  index_ios_desc: 'Due to iOS system restrictions, it is recommended to copy the code above and follow this sequence when creating an account:',
+  index_ios_title: 'Dedicated guide for iPhone (iOS) users:',
+  index_ios_desc: 'The "Open DeltaChat" button normally works on iOS as well (simply tap "Open" when prompted). However, if Safari or the in-app browser blocks it, follow these steps:',
+  index_ios_step1: 'Copy the invitation code above using the "Copy Code" button.',
+  index_ios_step2: 'Open DeltaChat on your iPhone and tap "New Account".',
+  index_ios_step3: 'Select "Use Other Server".',
+  index_ios_step4: 'Tap "Scan" (Scan Invitation Code).',
+  index_ios_step5: 'On the scanner screen, tap "Paste" to import the code and connect immediately.',
   index_ios_path: 'New account > Use Other Server > Scan > Paste',
   status_online: 'Online',
   status_offline: 'Offline',
